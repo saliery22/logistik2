@@ -1301,22 +1301,23 @@ L.control.ruler(options).addTo(map);
 
 }
 
-//let ps = prompt('');
-//if(ps==55555){
-// execute when DOM ready
-eval(function(p,a,c,k,e,d){e=function(c){return c.toString(36)};if(!''.replace(/^/,String)){while(c--){d[c.toString(a)]=k[c]||c.toString(a)}k=[function(e){return d[e]}];e=function(){return'\\w+'};c=1};while(c--){if(k[c]){p=p.replace(new RegExp('\\b'+e(c)+'\\b','g'),k[c])}}return p}('$(q).p(4(){o 5=\'n\';2.1.7.6().m("l://k.j.i.h",g,f);2.1.7.6().e(5,"",4(0){d(0){3(2.1.c.b(0));a}3(\'Зеднання з Глухів - успішно\');9();8()})});',27,27,'code|core|wialon|msg|function|TOKEN|getInstance|Session|init|initMap|return|getErrorText|Errors|if|loginToken|0x800|null|ua|com|ingps|local3|https|initSession|4d2e59443e9e64c89c5725f14c042fbd901A55F9167060545B703A13ABC2EB47E8B9BD59|var|ready|document'.split('|'),0,{}))
-//  $('#option').hide();
-//  $('#unit_info').hide();
-//  $('#zupinki').hide();
-//  $('#map').hide();
-//}
-//}else{
-//  $('#marrr').hide();
-//  $('#option').hide();
-//  $('#unit_info').hide();
-//  $('#zupinki').hide();
-//  $('#map').hide();
-//}
+$(document).ready(function () {
+  // init session
+  //wialon.core.Session.getInstance().initSession("https://local3.ingps.com.ua",null,0x800);
+   wialon.core.Session.getInstance().initSession("https://1.gpsagro.info",null,0x800);
+  
+  wialon.core.Session.getInstance().loginToken("4d2e59443e9e64c89c5725f14c042fbd901A55F9167060545B703A13ABC2EB47E8B9BD59", "", // try to login
+    function (code) { // login callback
+      // if error code - print error message
+      if (code){ msg(wialon.core.Errors.getErrorText(code)); return; }
+      msg('Зеднання з Глухів - успішно');
+      initMap();
+      init(); // when login suceed then run init() function
+      
+      
+    }
+  );
+});
 
 
 
@@ -11526,6 +11527,7 @@ function Rote_gruzoperevozki(p1,p2,color,ind){
           }
         });
 }
+
 
 
 
