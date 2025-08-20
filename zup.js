@@ -1,4 +1,6 @@
 
+var TOKEN = '4d2e59443e9e64c89c5725f14c042fbd901A55F9167060545B703A13ABC2EB47E8B9BD59';
+//'0999946a10477f4854a9e6f27fcbe8424E7222985DA6B8C3366AABB4B94147D6C5BAE69F';
 
 // global variables
 var map, marker,unitslist = [],unitslistID = [],allunits = [],rest_units = [],marshruts = [],zup = [], unitMarkers = [], markerByUnit = {},tile_layer, layers = {},marshrutMarkers = [],unitsID = {},Vibranaya_zona,temp_layer=[],trailers={},drivers={};
@@ -13,11 +15,11 @@ let zvit1=0;
 let zvit2=0;
 let zvit3=0;
 let zvit4=0;
-let RES_ID=26227;// 20030 "11_ККЗ"  26227 "KKZ_Gluhiv"
+let RES_ID=601000448;// 601000284   "11_ККЗ"  601000448  "KKZ_Gluhiv"
 
 let kof = 1.0038; // TURF corection
 
-
+let ftp_id = 601000441; //20233
 
 // for refreshing
 var currentPos = null, currentUnit = null;
@@ -147,6 +149,7 @@ function init() { // Execute after login succeed
       } else {
         areUnitsLoaded = true;
         msg('Техніка завнтажена - успішно');
+
         var res = session.getItem(RES_ID);
         var templ = res.getReports(); // get reports templates for resource
 	      for(var i in templ){
@@ -181,7 +184,7 @@ let marshrut_leyer_0;
 let polya_lablse = [];
 function initUIData() {
   var session = wialon.core.Session.getInstance();
-  var resource = wialon.core.Session.getInstance().getItem(20030); //26227 - Gluhiv 20030 "11_ККЗ"
+  var resource = wialon.core.Session.getInstance().getItem(601000284); //601000448  - Gluhiv 601000284 "11_ККЗ"
   drivers= resource.getDrivers();
   trailers = resource.getTrailers();
     let gzgroop = resource.getZonesGroups();
@@ -365,7 +368,7 @@ function initUIData() {
     
 
 
-      load_jurnal(20233,'zony.txt',function (data) { 
+      load_jurnal(ftp_id,'zony.txt',function (data) { 
         let log_zone=[];
         let log_zone_del=[];
 
@@ -411,7 +414,7 @@ function initUIData() {
     $("#geomodul_field_lis").trigger("chosen:updated");
   });
   avto=[];
-  load_jurnal(20233,'MR-avto-reestr.txt',function (data) { 
+  load_jurnal(ftp_id,'MR-avto-reestr.txt',function (data) { 
     $('#transport_logistik_tb').empty();
     $('#transport_logistik_tb').append("<tr><td><b>НОМЕР</b></td><td><b>ВОДІЙ</b></td><td><b>ДОВІЛЬНІ ДАНІ</b></td><td><b>СТОЯНКА</b></td><td><b>КООРДИНАТИ</b></td></tr>");
     for(let i = 1; i<data.length; i++){
@@ -429,7 +432,7 @@ layerControl.addOverlay(zonnnnna, "20км зона");
 
 
 
-load_jurnal(20233,'Pasajiry.txt',function (data) { 
+load_jurnal(ftp_id,'Pasajiry.txt',function (data) { 
   for(let i = 1; i<data.length; i++){
     let m=data[i].split('|');
     mehanizator_adresa.push([m[0],m[1],m[2],parseFloat(m[3].split(',')[0]),parseFloat(m[3].split(',')[1])]);
@@ -1301,12 +1304,41 @@ L.control.ruler(options).addTo(map);
 
 }
 
+//let ps = prompt('');
+//if(ps==55555){
+// execute when DOM ready
 $(document).ready(function () {
+
+
+
+// const svc = 'token/login';
+// const data = new FormData();
+// data.append('svc', svc);
+// //data.append('params', JSON.stringify({ token: '0999946a10477f4854a9e6f27fcbe8424E7222985DA6B8C3366AABB4B94147D6C5BAE69F'}));
+
+// fetch('https://local3.ingps.com.ua/wialon/ajax.html', {
+//   method: 'POST',
+//    headers: {
+//     'Content-Type': 'application/x-www-form-urlencoded', // Указываем тип контента
+//   },
+//   body: data,
+// })
+// .then(response => response.json())
+// .then(data => {
+//   console.log('Success:', data);
+// })
+// .catch((error) => {
+//   console.error('Error:', error);
+// });
+
+
+
+
   // init session
   //wialon.core.Session.getInstance().initSession("https://local3.ingps.com.ua",null,0x800);
-   wialon.core.Session.getInstance().initSession("https://1.gpsagro.info",null,0x800);
+   wialon.core.Session.getInstance().initSession("https://hst-api.wialon.com",null,0x800);
   
-  wialon.core.Session.getInstance().loginToken("4d2e59443e9e64c89c5725f14c042fbd901A55F9167060545B703A13ABC2EB47E8B9BD59", "", // try to login
+  wialon.core.Session.getInstance().loginToken(TOKEN, "", // try to login
     function (code) { // login callback
       // if error code - print error message
       if (code){ msg(wialon.core.Errors.getErrorText(code)); return; }
@@ -1317,7 +1349,17 @@ $(document).ready(function () {
       
     }
   );
+  
 });
+
+
+//}else{
+//  $('#marrr').hide();
+//  $('#option').hide();
+//  $('#unit_info').hide();
+//  $('#zupinki').hide();
+//  $('#map').hide();
+//}
 
 
 
@@ -3841,8 +3883,8 @@ $("#reestr_save_BT").on("click", function (evt){
       }
     }
   }
-  write_jurnal(20233,'geomodul.txt',save_data,function () {
-  write_jurnal(20233,'jurnal.txt',save_data_jurnal,function () { });
+  write_jurnal(ftp_id,'geomodul.txt',save_data,function () {
+  write_jurnal(ftp_id,'jurnal.txt',save_data_jurnal,function () { });
     audio.play();
   });
 
@@ -6726,7 +6768,7 @@ $('#geomodul_bt').click(function() {
    $("#unit_table").empty();
  clearGarbage(garbagepoly);
  garbagepoly=[];
-  load_jurnal(20233,'geomodul.txt',function (data) { 
+  load_jurnal(ftp_id,'geomodul.txt',function (data) { 
     
     for(let i = 1; i<data.length; i+=2){
       let m=data[i].split('|');
@@ -7462,9 +7504,9 @@ function jurnal(obj,unit){
     $('#inftb').hide();
     $("#jurnal_name").text(""+unit.getName()+"");
     //let remotee= wialon.core.Remote.getInstance(); 
-    //remotee.remoteCall('file/list',{'itemId':20233,'storageType':1,'path':'/','mask':'jurnal (3).txt','recursive':false,'fullPath':true},function (error,data) { if (error) {msg(wialon.core.Errors.getErrorText(error));}else{console.log(data);}});  
-    //remotee.remoteCall('file/write',{'itemId':20233,'storageType':1,'path':'//jurnal.txt',"content":'helo||',"writeType":1,'contentType':0},function (error,data) {if (error) {msg(wialon.core.Errors.getErrorText(error));}else{console.log("write_done");}}); 
-    //remotee.remoteCall('file/read',{'itemId':20233,'storageType':1,'path':'//jurnal.txt','contentType':0},function (error,data) { if (error) {msg(wialon.core.Errors.getErrorText(error));}else{console.log(data.content);}}); 
+    //remotee.remoteCall('file/list',{'itemId':ftp_id,'storageType':1,'path':'/','mask':'jurnal (3).txt','recursive':false,'fullPath':true},function (error,data) { if (error) {msg(wialon.core.Errors.getErrorText(error));}else{console.log(data);}});  
+    //remotee.remoteCall('file/write',{'itemId':ftp_id,'storageType':1,'path':'//jurnal.txt',"content":'helo||',"writeType":1,'contentType':0},function (error,data) {if (error) {msg(wialon.core.Errors.getErrorText(error));}else{console.log("write_done");}}); 
+    //remotee.remoteCall('file/read',{'itemId':ftp_id,'storageType':1,'path':'//jurnal.txt','contentType':0},function (error,data) { if (error) {msg(wialon.core.Errors.getErrorText(error));}else{console.log(data.content);}}); 
   }
   if(obj==1){
     $('#jurnal').show();
@@ -7478,11 +7520,11 @@ function jurnal_update(){
   let tt = new Date(Date.parse($('#f').text())).toJSON().slice(0,10);
   $('#jurnal_time').val(tt);
 
-  update_jurnal(20233,'jurnal.txt',function (data) { 
+  update_jurnal(ftp_id,'jurnal.txt',function (data) { 
     let nam_js = $("#jurnal_name").text();
     if (data==jurnal_size){
       $("#jurnal_name_table").empty();
-      load_jurnal(20233,'jurnal_delete.txt',function (data) {
+      load_jurnal(ftp_id,'jurnal_delete.txt',function (data) {
         let unit_jr_data=[]; 
           dataLoop:for(let i = 1; i<jurnal_data.length; i++){
             for (v = 1; v < data.length; v++) {if (parseInt(data[v]) == i) continue dataLoop; } 
@@ -7500,11 +7542,11 @@ function jurnal_update(){
       });
     }else{
       let size=data;
-      load_jurnal(20233,'jurnal.txt',function (data) { 
+      load_jurnal(ftp_id,'jurnal.txt',function (data) { 
         jurnal_data=data;
         jurnal_size=size;
         $("#jurnal_name_table").empty();
-        load_jurnal(20233,'jurnal_delete.txt',function (data) { 
+        load_jurnal(ftp_id,'jurnal_delete.txt',function (data) { 
           let unit_jr_data=[]; 
           dataLoop:for(let i = 1; i<jurnal_data.length; i++){
             for (v = 1; v < data.length; v++) {if (parseInt(data[v]) == i) continue dataLoop; } 
@@ -7553,7 +7595,7 @@ let name=$('#jurnal_name').text();;
 let text=$('#jurnal_text').val();
 let autor=autorization;
 if(date && name && text && autor && autorization!=''){
-  write_jurnal(20233,'jurnal.txt','||'+date+'|'+name+'|'+text+'|'+autor+'|'+time,function () { 
+  write_jurnal(ftp_id,'jurnal.txt','||'+date+'|'+name+'|'+text+'|'+autor+'|'+time,function () { 
     jurnal_update();
   });
 }
@@ -7564,11 +7606,11 @@ function jurnal_online(){
   let table_jur=document.getElementById('jurnal_online_tb');
   let index =0;
   if (table_jur.rows.length>1)index =  parseInt(table_jur.rows[table_jur.rows.length-1].cells[0].innerText)+1;
-  update_jurnal(20233,'jurnal.txt',function (data) { 
+  update_jurnal(ftp_id,'jurnal.txt',function (data) { 
     if (data==jurnal_size){ 
       if(index==0)index=jurnal_data.length-50;
       if(index<1)index=1;
-        load_jurnal(20233,'jurnal_delete.txt',function (data) {
+        load_jurnal(ftp_id,'jurnal_delete.txt',function (data) {
 
         for(let i = index; i<jurnal_data.length; i++){
         let m=jurnal_data[i].split('|');
@@ -7595,12 +7637,12 @@ function jurnal_online(){
     });
     }else{
       let size=data;
-      load_jurnal(20233,'jurnal.txt',function (data) { 
+      load_jurnal(ftp_id,'jurnal.txt',function (data) { 
         jurnal_data=data;
         jurnal_size=size;
         if(index==0)index=jurnal_data.length-50;
         if(index<1)index=1;
-        load_jurnal(20233,'jurnal_delete.txt',function (data) { 
+        load_jurnal(ftp_id,'jurnal_delete.txt',function (data) { 
           for(let i = index; i<jurnal_data.length; i++){
           let m=jurnal_data[i].split('|');
           let d=new Date(parseInt(m[0])).toLocaleString("uk-UA", {year:'numeric',month:'numeric',day:'numeric'});
@@ -7635,7 +7677,7 @@ $("#jurnal_online_tb").on("click", function (evt){
   let row = evt.target.parentNode;
   if(row.rowIndex>0){
 if(evt.target.cellIndex==6){
-    write_jurnal(20233,'jurnal_delete.txt','||'+row.cells[0].textContent,function () { 
+    write_jurnal(ftp_id,'jurnal_delete.txt','||'+row.cells[0].textContent,function () { 
       msg("запис видалено");
       jurnal_update();
       jurnal_online();
@@ -7690,9 +7732,9 @@ $("#jurnal_zvit_buton").on("click", function (){
   let str =$('#jurnal_units').val().split(',');
   let fr =Date.parse($('#jurnal_time1').val());
   let to =Date.parse($('#jurnal_time2').val());
-  update_jurnal(20233,'jurnal.txt',function (data) { 
+  update_jurnal(ftp_id,'jurnal.txt',function (data) { 
     if (data==jurnal_size){ 
-      load_jurnal(20233,'jurnal_delete.txt',function (data) { 
+      load_jurnal(ftp_id,'jurnal_delete.txt',function (data) { 
         dataLoop1: for(let i = 1; i<jurnal_data.length; i++){
           for (v = 1; v < data.length; v++) {if (parseInt(data[v]) == i) continue dataLoop1; } 
         let m=jurnal_data[i].split('|');
@@ -7715,10 +7757,10 @@ $("#jurnal_zvit_buton").on("click", function (){
     });
     }else{
       let size=data;
-      load_jurnal(20233,'jurnal.txt',function (data) { 
+      load_jurnal(ftp_id,'jurnal.txt',function (data) { 
         jurnal_data=data;
         jurnal_size=size;
-        load_jurnal(20233,'jurnal_delete.txt',function (data) { 
+        load_jurnal(ftp_id,'jurnal_delete.txt',function (data) { 
           dataLoop1: for(let i = 1; i<jurnal_data.length; i++){
             for (v = 1; v < data.length; v++) {if (parseInt(data[v]) == i) continue dataLoop1; } 
           let m=jurnal_data[i].split('|');
@@ -7889,7 +7931,7 @@ $("#adresy_add").on("click", function (){
   let r =$('#adresy_radius').val();
   let s ='true';
   if(n && c && r && s){
-  write_jurnal(20233,'zony.txt','||'+c+'|'+r+'|'+n+'|'+s,function () { 
+  write_jurnal(ftp_id,'zony.txt','||'+c+'|'+r+'|'+n+'|'+s,function () { 
     audio.play();
 
     let y = parseFloat(c.split(',')[0]);
@@ -7922,7 +7964,7 @@ $("#adresy_remove").on("click", function (){
   let s ='false';
  
   if(n && c && r && s && activ_zone!=0){
-    write_jurnal(20233,'zony.txt','||'+c+'|'+r+'|'+n+'|'+s,function () { 
+    write_jurnal(ftp_id,'zony.txt','||'+c+'|'+r+'|'+n+'|'+s,function () { 
       audio.play();
       lgeozoneee.removeLayer(activ_zone);
       activ_zone=0;
@@ -7964,7 +8006,7 @@ $("#transport_logistik_bt").on("click", function (){
     for ( j = 1; j < tableRow.length; j++){ 
        save_data+='||'+tableRow[j].cells[0].textContent+'|'+tableRow[j].cells[1].textContent+'|'+tableRow[j].cells[2].textContent+'|'+tableRow[j].cells[3].textContent+'|'+tableRow[j].cells[4].textContent+'\n';
     } 
-    rewrite_jurnal(20233,'MR-avto-reestr.txt',save_data,function () { 
+    rewrite_jurnal(ftp_id,'MR-avto-reestr.txt',save_data,function () { 
       audio.play();
     });
 
@@ -9008,13 +9050,13 @@ function marshrut_rote(marshrut,id){
 let logistik_size=0;
 let logistik_data=[];
 function update_logistik_data(calbek){
-  update_jurnal(20233,'MR-avto.txt',function (data) { 
+  update_jurnal(ftp_id,'MR-avto.txt',function (data) { 
     if (data==logistik_size){ 
       calbek();
       return;
     }else{
       let size=data;
-      load_jurnal(20233,'MR-avto.txt',function (data) { 
+      load_jurnal(ftp_id,'MR-avto.txt',function (data) { 
         logistik_data=data;
         logistik_size=size;
         //console.log(logistik_data);
@@ -9279,7 +9321,7 @@ if(evt.target.parentNode.cellIndex==5){
     alert("Маршрут не містить точок!");
     return;
   }
-    write_jurnal(20233,'MR-avto.txt','||'+t+'|'+n+'|'+text+'|'+point+'|'+radius+'|'+chek+'|'+coment+'|\n',function () { 
+    write_jurnal(ftp_id,'MR-avto.txt','||'+t+'|'+n+'|'+text+'|'+point+'|'+radius+'|'+chek+'|'+coment+'|\n',function () { 
       msg("маршрут додано");
       evt.target.style.background = "rgb(170, 248, 170)";
       evt.target.innerHTML = coment;
@@ -9312,7 +9354,7 @@ if(evt.target.parentNode.cellIndex==3){
     alert("Маршрут не містить точок!");
     return;
   }
-    write_jurnal(20233,'MR-avto.txt','||'+t+'|'+n+'|'+text+'|'+point+'|'+radius+'|'+chek+'|'+coment+'|\n',function () { 
+    write_jurnal(ftp_id,'MR-avto.txt','||'+t+'|'+n+'|'+text+'|'+point+'|'+radius+'|'+chek+'|'+coment+'|\n',function () { 
       msg("маршрут додано");
       audio.play();
       evt.target.style.background = "rgb(170, 248, 170)";
@@ -9621,7 +9663,7 @@ $("#log_control_tb").on("click", function (evt){
   let t=Date.parse(tb.rows[0].cells[evt.target.parentNode.cellIndex].innerText);
   let n=row.cells[0].innerText;
   let m='ремонт';
-    write_jurnal(20233,'MR-avto.txt','||'+t+'|'+n+'|'+m+'|\n',function () { 
+    write_jurnal(ftp_id,'MR-avto.txt','||'+t+'|'+n+'|'+m+'|\n',function () { 
       msg("ремонт додано");
       evt.target.style = 'background: rgb(247, 161, 161);width: 100%;';
       evt.target.innerText = "ремонт-зняти";
@@ -9635,7 +9677,7 @@ if(row.rowIndex>0 && evt.target.innerText =='ремонт-зняти'){
   let t=Date.parse(tb.rows[0].cells[evt.target.parentNode.cellIndex].innerText);
   let n=row.cells[0].innerText;
   let m='готовий';
-    write_jurnal(20233,'MR-avto.txt','||'+t+'|'+n+'|'+m+'|\n',function () { 
+    write_jurnal(ftp_id,'MR-avto.txt','||'+t+'|'+n+'|'+m+'|\n',function () { 
       msg("знято з ремонту додано");
       evt.target.style = 'background: ;width: 100%;';
       evt.target.innerText = "на ремонт";
@@ -9781,7 +9823,7 @@ $("#cont_b1").on("click", function (){
   }
 
 
-     write_jurnal(20233,'MR-avto.txt','||'+t+'|'+n+'|'+text+'|'+point+'|'+radius+'|'+chek+'|'+coment+'|\n',function () { 
+     write_jurnal(ftp_id,'MR-avto.txt','||'+t+'|'+n+'|'+text+'|'+point+'|'+radius+'|'+chek+'|'+coment+'|\n',function () { 
        msg("маршрут змінено");
        audio.play();
        update_logistik_data(control_avto);
@@ -9794,7 +9836,7 @@ $("#cont_b2").on("click", function (){
   let t=Date.parse($('#cont_time').text());
   let n=$('#cont_unit').text();
   let mm='видалено';
-    write_jurnal(20233,'MR-avto.txt','||'+t+'|'+n+'|'+mm+'|\n',function () { 
+    write_jurnal(ftp_id,'MR-avto.txt','||'+t+'|'+n+'|'+mm+'|\n',function () { 
       msg("маршрут видалено");
       audio.play();
       update_logistik_data(control_avto);
@@ -10775,12 +10817,12 @@ $('#marsh_bt3').click(function() {
   if(data.length==0)data.push([]);
   data.push(data_av);
      let save_data = JSON.stringify(data);
-  rewrite_jurnal(20233,'gruzmarsh.txt',save_data,function () {audio.play();});
+  rewrite_jurnal(ftp_id,'gruzmarsh.txt',save_data,function () {audio.play();});
  });
 
  $('#marsh_bt4').click(function() {
   let remotee= wialon.core.Remote.getInstance(); 
-  remotee.remoteCall('file/read',{'itemId':20233,'storageType':1,'path':'//'+'gruzmarsh.txt','contentType':0},function (error,data) {
+  remotee.remoteCall('file/read',{'itemId':ftp_id,'storageType':1,'path':'//'+'gruzmarsh.txt','contentType':0},function (error,data) {
     if (error) {msg(wialon.core.Errors.getErrorText(error));
      return;
     }else{
@@ -11527,14 +11569,4 @@ function Rote_gruzoperevozki(p1,p2,color,ind){
           }
         });
 }
-
-
-
-
-
-
-
-
-
-
 
