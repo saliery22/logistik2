@@ -5764,9 +5764,9 @@ function avto_OBD(data){
 
       if(!data[i][ii][19])continue;
       if(!data[i][ii+1][19])continue;
-      if(parseInt(data[i][ii][23])){
-        if(km_odo_start==0) km_odo_start = parseInt(data[i][ii][23]);
-        km_odo = parseInt(data[i][ii][23])-km_odo_start;
+      if(parseInt(data[i][ii])){
+        if(km_odo_start==0) km_odo_start = parseInt(data[i][ii]);
+        km_odo = parseInt(data[i][ii])-km_odo_start;
       }
       
       let time1 = Date.parse(data[i][ii][1])/1000;
@@ -10467,9 +10467,9 @@ async function logistik_zvit(data){
         if (tb.rows[4].cells[c1].getElementsByTagName('input')[0].checked==false  || tb.rows[4].cells[c2].getElementsByTagName('input')[0].checked==false) {
           for(let i=2;i<data[0].length;i++){
             if(!data[0][i][1] || !data[0][i-1][1])continue;
-            if(data[0][i][23] && data[0][i][23]!='-----'){
-              if(odometr0==0)odometr0=parseInt(data[0][i][23]);
-              odometr1=parseInt(data[0][i][23]);
+            if(data[0][i][22] && data[0][i][22]!='-----'){
+              if(odometr0==0)odometr0=parseInt(data[0][i][22]);
+              odometr1=parseInt(data[0][i][22]);
             }
             let d1=Date.parse(data[0][i][1]);
             if(d1<from || d1>to)continue;
@@ -10516,9 +10516,9 @@ async function logistik_zvit(data){
         } else {
           for(let i=2;i<data[0].length;i++){
             if(!data[0][i][1] || !data[0][i-1][1])continue;
-            if(data[0][i][23] && data[0][i][23]!='-----'){
-              if(odometr0==0)odometr0=parseInt(data[0][i][23]);
-              odometr1=parseInt(data[0][i][23]);
+            if(data[0][i][22] && data[0][i][22]!='-----'){
+              if(odometr0==0)odometr0=parseInt(data[0][i][22]);
+              odometr1=parseInt(data[0][i][22]);
             }
             let d1=Date.parse(data[0][i][1]);
             if(d1<from || d1>to)continue;
@@ -11569,6 +11569,7 @@ function Rote_gruzoperevozki(p1,p2,color,ind){
           }
         });
 }
+
 
 
 
