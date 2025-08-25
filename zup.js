@@ -5762,8 +5762,8 @@ function avto_OBD(data){
         if(zapr1-zapr0>5)zapr+=zapr1-zapr0;
       }
 
-      if(!data[i][ii][19])continue;
-      if(!data[i][ii+1][19])continue;
+      if(!data[i][ii][20])continue;
+      if(!data[i][ii+1][20])continue;
       if(parseInt(data[i][ii][22])){
         if(km_odo_start==0) km_odo_start = parseInt(data[i][ii][22]);
         km_odo = parseInt(data[i][ii][22])-km_odo_start;
@@ -11569,6 +11569,7 @@ function Rote_gruzoperevozki(p1,p2,color,ind){
           }
         });
 }
+
 
 
 
