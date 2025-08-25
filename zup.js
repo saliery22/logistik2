@@ -5736,27 +5736,27 @@ function avto_OBD(data){
       if(!data[i][ii][0])continue;
       if(!data[i][ii+1][0])continue;
 
-      if(data[i][ii][6]){
-        if(data[i][ii][6]!='-----'){
-          if(dut0==-10)dut0 = parseFloat(data[i][ii][6]);
-          dut1 = parseFloat(data[i][ii][6]);
+      if(data[i][ii][7]){
+        if(data[i][ii][7]!='-----'){
+          if(dut0==-10)dut0 = parseFloat(data[i][ii][7]);
+          dut1 = parseFloat(data[i][ii][7]);
         }
       }
       if(parseInt(data[i][ii][2])>0){
-        if(data[i][ii][6] && data[i][ii][6]!='-----'){
-          zapr1= parseFloat(data[i][ii][6]);
+        if(data[i][ii][7] && data[i][ii][7]!='-----'){
+          zapr1= parseFloat(data[i][ii][7]);
           if( stoy==1  && zapr0>0 &&zapr1-zapr0>5)zapr+=zapr1-zapr0;
-          zapr0=parseFloat(data[i][ii][6]);
+          zapr0=parseFloat(data[i][ii][7]);
           stoy=0;
           }
           
       }else{
-        if(data[i][ii][6] && data[i][ii][6]!='-----'){
-          if(zapr0==-10)zapr0=parseFloat(data[i][ii][6]);
+        if(data[i][ii][7] && data[i][ii][7]!='-----'){
+          if(zapr0==-10)zapr0=parseFloat(data[i][ii][7]);
         }
         stoy=1;
       }
-      if(parseFloat(data[i][ii][6]))zapr00=parseFloat(data[i][ii][6]);
+      if(parseFloat(data[i][ii][7]))zapr00=parseFloat(data[i][ii][7]);
       if(ii==data[i].length-2 && zapr0>=0 && parseInt(data[i][ii][2])==0){
         zapr1= zapr00;
         if(zapr1-zapr0>5)zapr+=zapr1-zapr0;
@@ -11569,6 +11569,7 @@ function Rote_gruzoperevozki(p1,p2,color,ind){
           }
         });
 }
+
 
 
 
