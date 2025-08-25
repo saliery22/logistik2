@@ -5764,15 +5764,15 @@ function avto_OBD(data){
 
       if(!data[i][ii][19])continue;
       if(!data[i][ii+1][19])continue;
-      if(parseInt(data[i][ii])){
-        if(km_odo_start==0) km_odo_start = parseInt(data[i][ii]);
-        km_odo = parseInt(data[i][ii])-km_odo_start;
+      if(parseInt(data[i][ii][22])){
+        if(km_odo_start==0) km_odo_start = parseInt(data[i][ii][22]);
+        km_odo = parseInt(data[i][ii][22])-km_odo_start;
       }
       
       let time1 = Date.parse(data[i][ii][1])/1000;
       let time2 = Date.parse(data[i][ii+1][1])/1000;
-      let rpm1 = parseInt(data[i][ii][19]);
-      let rpm2 = parseInt(data[i][ii+1][19]);
+      let rpm1 = parseInt(data[i][ii][20]);
+      let rpm2 = parseInt(data[i][ii+1][20]);
       let y = parseFloat(data[i][ii][0].split(',')[0]);
       let x = parseFloat(data[i][ii][0].split(',')[1]);
       let yy = parseFloat(data[i][ii+1][0].split(',')[0]);
@@ -11569,6 +11569,7 @@ function Rote_gruzoperevozki(p1,p2,color,ind){
           }
         });
 }
+
 
 
 
