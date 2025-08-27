@@ -3027,7 +3027,7 @@ var data = new google.visualization.DataTable();
    
 for (var i = 2; i < data_graf.length-1; i++) {
 a[1]=null;
-if (data_graf[i][3]=='0 км/ч'){ a[1]=parseFloat(data_graf[i][2]);}
+if (parseInt(data_graf[i][3])==0){ a[1]=parseFloat(data_graf[i][2]);}
 a[2]=null;
 a[3]=parseFloat(data_graf[i][2]);  
 a[5]='стоїть\n'+data_graf[i][0]+'\n'+data_graf[i][1]+'\n'+data_graf[i][2];
@@ -11569,6 +11569,7 @@ function Rote_gruzoperevozki(p1,p2,color,ind){
           }
         });
 }
+
 
 
 
