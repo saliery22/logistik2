@@ -3803,8 +3803,8 @@ $("#robota_polya_tb").on("click", function (evt){
     let name = row.cells[6].textContent;
      for (let i = 0; i<geozones.length; i++){
      if(geozones[i].zone.n == name){
-      let y=geozones[i]._bounds._northEast.lat;
-      let x=geozones[i]._bounds._northEast.lng;
+     let y=((geozones[i]._bounds._northEast.lat+geozones[i]._bounds._southWest.lat)/2).toFixed(5);
+     let x=((geozones[i]._bounds._northEast.lng+geozones[i]._bounds._southWest.lng)/2).toFixed(5);
       map.setView([y,x],map.getZoom(),{animate: false});
            geozonepoint.length =0;
            geozonepointTurf.length =0;
@@ -7689,8 +7689,8 @@ if(evt.target.cellIndex==6){
     let name = row.cells[2].textContent;
     for (let i = 0; i<geozones.length; i++){
       if(geozones[i].zone.n == name){
-       let y=geozones[i]._bounds._northEast.lat;
-       let x=geozones[i]._bounds._northEast.lng;
+     let y=((geozones[i]._bounds._northEast.lat+geozones[i]._bounds._southWest.lat)/2).toFixed(5);
+     let x=((geozones[i]._bounds._northEast.lng+geozones[i]._bounds._southWest.lng)/2).toFixed(5);
        map.setView([y,x],map.getZoom(),{animate: false});
        clearGEO();
        let point = geozones[i]._latlngs[0];
@@ -10456,7 +10456,7 @@ async function logistik_zvit(data){
       if(tb.rows[0].cells[j].textContent=='')continue;
       mar_text+=' - '+tb.rows[1].cells[j].children[0].children[0].textContent;
       if(tb.rows[1].cells[j].children[0].children[0].textContent=="СТОЯНКА" && j>0 && j<tb.rows[0].cells.length-3)home_stops+=parseInt(tb.rows[2].cells[j+1].textContent.split(',')[1]);
-      if(tb.rows[1].cells[j].children[0].children[0].textContent=="некоректна" )err_stops+=parseInt(tb.rows[2].cells[j+1].textContent.split(',')[1]);
+      if(tb.rows[1].cells[j].children[0].children[0].textContent=="некоректна" && j>0 && j<tb.rows[0].cells.length-3)err_stops+=parseInt(tb.rows[2].cells[j+1].textContent.split(',')[1]);
       if(c1==-1){
          c1=j;
          from =  Date.parse(tb.rows[2].cells[c1+2].textContent);
@@ -11569,6 +11569,7 @@ function Rote_gruzoperevozki(p1,p2,color,ind){
           }
         });
 }
+
 
 
 
