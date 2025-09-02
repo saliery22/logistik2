@@ -3927,6 +3927,7 @@ function TestNavigation(data){
     
   let no_aktiv = [];
   let mark;
+  let dt = unitsgrup.Заправки;
   for(var ii=0; ii < unitslist.length; ii++){
 if(!unitslist[ii].getPosition())continue;
     if (Date.parse($('#fromtime1').val())/1000 > unitslist[ii].getPosition().t){ no_aktiv.push(unitslist[ii]); }
@@ -3953,7 +3954,7 @@ if(!unitslist[ii].getPosition())continue;
     let iddd = data[i][0][0];
     if(data[i][0][2].indexOf('Топливо')>=0 || data[i][0][2].indexOf('Паливо')>=0 || data[i][0][2].indexOf('ДРП')>=0 || data[i][0][2].indexOf('ДУТ')>=0){}else continue;
     for (let ii = 1; ii < data[i].length; ii++) {
-      if(namee.indexOf('Шкурат')>=0 || namee.indexOf('Білоус')>=0|| namee.indexOf('Колотуша')>=0|| namee.indexOf('Дробниця')>=0|| namee.indexOf('Писаренко')>=0|| namee.indexOf('Штацький')>=0|| namee.indexOf('ВМ4156ВС')>=0|| namee.indexOf('аправка')>=0){
+    if(dt.indexOf(namee)>=0){
          if(data[i][ii][4]  && zapcarta != data[i][ii][4]){
           zapcarta = data[i][ii][4];
           no_aktiv.forEach((element) => {if(element.getName().indexOf(zapcarta)>=0){
@@ -11569,6 +11570,7 @@ function Rote_gruzoperevozki(p1,p2,color,ind){
           }
         });
 }
+
 
 
 
