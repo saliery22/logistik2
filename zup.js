@@ -1,6 +1,7 @@
-
+//var TOKEN = '0999946a10477f4854a9e6f27fcbe8424E7222985DA6B8C3366AABB4B94147D6C5BAE69F';
 var TOKEN = '4d2e59443e9e64c89c5725f14c042fbd901A55F9167060545B703A13ABC2EB47E8B9BD59';
-//'0999946a10477f4854a9e6f27fcbe8424E7222985DA6B8C3366AABB4B94147D6C5BAE69F';
+
+
 
 // global variables
 var map, marker,unitslist = [],unitslistID = [],allunits = [],rest_units = [],marshruts = [],zup = [], unitMarkers = [], markerByUnit = {},tile_layer, layers = {},marshrutMarkers = [],unitsID = {},Vibranaya_zona,temp_layer=[],trailers={},drivers={};
@@ -15,11 +16,14 @@ let zvit1=0;
 let zvit2=0;
 let zvit3=0;
 let zvit4=0;
+let upd=false;
+//let RES_ID=26227;// 20030 "11_ККЗ"  26227 "KKZ_Gluhiv"
 let RES_ID=601000448;// 601000284   "11_ККЗ"  601000448  "KKZ_Gluhiv"
+let ftp_id = 601000441; //20233
 
 let kof = 1.0038; // TURF corection
 
-let ftp_id = 601000441; //20233
+
 
 // for refreshing
 var currentPos = null, currentUnit = null;
@@ -28,6 +32,7 @@ var isUIActive = true;
 
 
 var tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds
+
 
 var from111 = new Date().toJSON().slice(0,11) + '00:00';
 var from222 = (new Date(Date.now() - tzoffset)).toISOString().slice(0, -8);
@@ -86,9 +91,8 @@ function getUnitMarker(unit) {
       
      var unitId = unit.getId();
 
-     $("#lis0").chosen().val(unit.getId());
-     
-    $("#lis0").trigger("chosen:updated");
+    treeselect3.value=unit.getId();
+    treeselect3.mount();
     if ($('#option').is(':hidden')) {}else{ 
       jurnal(0,unit);
     }
@@ -104,6 +108,7 @@ function getUnitMarker(unit) {
   markerByUnit[unit.getId()] = marker;
   unitslistID[unit.getId()] = unit;
   allunits.push(unit);
+  serch_list.push({name:unit.getName(), value:unit.getId()});
   unitsID[unit.getName()] = unit.getId();
   return marker;
 }
@@ -119,6 +124,13 @@ function msg(text) { $('#log').prepend(text + '<br/>'); }
 function init() { // Execute after login succeed
   // get instance of current Session
   var session = wialon.core.Session.getInstance();
+  let lng = session.__cX.$$user_customProps.language;
+  let tz0 = session.__cX.$$user_customProps.tz;
+   let tz = tz0 & 0xffff;
+   if(tz0<0)tz = tz | 0xffff0000;
+   console.log(tz)
+   console.log(lng)
+
   // specify what kind of data should be returned
   var flags = wialon.item.Item.dataFlag.base | wialon.item.Unit.dataFlag.lastPosition;
   var res_flags = wialon.item.Item.dataFlag.base | wialon.item.Resource.dataFlag.reports | wialon.item.Resource.dataFlag.zones | wialon.item.Resource.dataFlag.zoneGroups | wialon.item.Resource.dataFlag.trailers | wialon.item.Resource.dataFlag.drivers;
@@ -149,7 +161,6 @@ function init() { // Execute after login succeed
       } else {
         areUnitsLoaded = true;
         msg('Техніка завнтажена - успішно');
-
         var res = session.getItem(RES_ID);
         var templ = res.getReports(); // get reports templates for resource
 	      for(var i in templ){
@@ -175,6 +186,7 @@ function init() { // Execute after login succeed
 let geozonepoint = [];
 let geozonepointTurf = [];
 let geozones = [];
+let geozonesID = [];
 let geozonesgrup = [];
 let unitsgrup = {};
 let IDzonacord=[];
@@ -182,9 +194,13 @@ let lgeozoneee;
 let activ_zone=0;
 let marshrut_leyer_0;
 let polya_lablse = [];
+let serch_list =[];
+let serch_list_avto=[];
+let serch_list_zones =[];
+let treeselect3;
 function initUIData() {
   var session = wialon.core.Session.getInstance();
-  var resource = wialon.core.Session.getInstance().getItem(601000284); //601000448  - Gluhiv 601000284 "11_ККЗ"
+  var resource = wialon.core.Session.getInstance().getItem(601000284); //601000284   "11_ККЗ"  601000448  "KKZ_Gluhiv"
   drivers= resource.getDrivers();
   trailers = resource.getTrailers();
     let gzgroop = resource.getZonesGroups();
@@ -217,6 +233,8 @@ function initUIData() {
            geozona.zone = zone;
            geozona.gr = zonegr;
            geozones.push(geozona);
+           serch_list.push({name:zone.n, value: "pole_"+zone.id});
+           geozonesID[zone.id] = geozona;
            $('#geomodul_field_lis').append($('<option>').text(zone.n).val(zone.n));
            $('#lis0').append($('<option>').text(zone.n).val("поле_"+zone.n));
            
@@ -326,6 +344,52 @@ function initUIData() {
           });
 
       }
+       treeselect3 = new Treeselect({
+  parentHtmlContainer: document.querySelector('.container3'),
+  options: serch_list,
+  //staticList: true,
+  //alwaysOpen: true,
+  //openLevel: 0,
+  showTags: false,
+  saveScrollPosition:true,
+  isSingleSelect:true
+});
+treeselect3.srcElement.addEventListener('input', (e) => { 
+
+
+if(typeof e.detail == 'string' && e.detail.split('_')[0]=='pole'){
+  let idzone = e.detail.split('_')[1];
+  let zone =  geozonesID[idzone]
+     let y=((zone._bounds._northEast.lat+zone._bounds._southWest.lat)/2).toFixed(5);
+     let x=((zone._bounds._northEast.lng+zone._bounds._southWest.lng)/2).toFixed(5);
+     map.setView([y,x],map.getZoom(),{animate: false});
+          geozonepoint.length =0;
+          geozonepointTurf.length =0;
+          clearGEO();
+       let point = zone._latlngs[0];
+       let ramka=[];
+       for (let i = 0; i < point.length; i++) {
+         let lat =point[i].lat;
+         let lng =point[i].lng;
+         geozonepoint.push({x:lat, y:lng}); 
+         geozonepointTurf.push([lng,lat]);
+         ramka.push([lat, lng]);
+         if(i == point.length-1 && geozonepoint[0]!=geozonepoint[i]){
+           geozonepoint.push(geozonepoint[0]); 
+           geozonepointTurf.push(geozonepointTurf[0]);
+           ramka.push(ramka[0]);
+         }
+         }
+       let polilane = L.polyline(ramka, {color: 'blue'}).addTo(map);
+       geo_layer.push(polilane);
+       Naryady_start();
+
+    return;
+}
+
+   onUnitSelected();        
+})
+
       $("#lis0").trigger("chosen:updated"); 
       let lgeozone = L.layerGroup(geozones);
       layerControl.addOverlay(lgeozone, "Геозони");
@@ -367,8 +431,51 @@ function initUIData() {
       layerControl.addOverlay(lgeozonee, "Регіони");
     
 
+     let sr_list_zn_00 = [];
+       for (var key in gzgroop) {
+        let tree_zone_child =[];
+        gzgroop[key].zns.forEach(function(item1) { 
+          if(geozonesID[item1]){
+          tree_zone_child.push({"value": gzgroop[key].n+"|||"+item1,"name": geozonesID[item1].zone.n,"children": []})
+          } 
+        });
+        if(gzgroop[key].n[0]=='*'){
+          sr_list_zn_00.push({ "value": gzgroop[key].n, "name": gzgroop[key].n+" ("+tree_zone_child.length+")", "children": tree_zone_child,"htmlAttr": {},"isGroupSelectable": true,"disabled": false, });
+        } else{
+          serch_list_zones.push({ "value": gzgroop[key].n, "name": gzgroop[key].n+" ("+tree_zone_child.length+")", "children": tree_zone_child,"htmlAttr": {},"isGroupSelectable": true,"disabled": false, });
+        }
+    
+      
+      }
 
-      load_jurnal(ftp_id,'zony.txt',function (data) { 
+const treeselect = new Treeselect({
+  parentHtmlContainer: document.querySelector('.container2'),
+
+  options: [{ "value": -1, "name": 'ВСІ ГЕОЗОН', children: serch_list_zones },{ "value": -10, "name": '***', children: sr_list_zn_00 }],
+  
+  //staticList: true,
+  //alwaysOpen: true,
+  saveScrollPosition:true,
+  openLevel: 0,
+  showTags: false,
+  tagsCountText: "вибрано",
+  placeholder: "ГЕОЗОНИ",
+  //appendToBody: true,
+  listClassName: 'llll',
+});
+treeselect.srcElement.addEventListener('input', (e) => {
+   for (let i = 0; i<geozones.length; i++){ map.removeLayer(geozones[i]); }         
+       for (let ii = 0; ii<e.detail.length; ii++){
+         let id = parseInt(e.detail[ii].split('|||')[1]);
+         if(geozonesID[id]) geozonesID[id].addTo(map);   
+           }
+})
+
+
+
+
+
+      load_jurnal(601000441,'zony.txt',function (data) { 
         let log_zone=[];
         let log_zone_del=[];
 
@@ -414,7 +521,7 @@ function initUIData() {
     $("#geomodul_field_lis").trigger("chosen:updated");
   });
   avto=[];
-  load_jurnal(ftp_id,'MR-avto-reestr.txt',function (data) { 
+  load_jurnal(601000441,'MR-avto-reestr.txt',function (data) { 
     $('#transport_logistik_tb').empty();
     $('#transport_logistik_tb').append("<tr><td><b>НОМЕР</b></td><td><b>ВОДІЙ</b></td><td><b>ДОВІЛЬНІ ДАНІ</b></td><td><b>СТОЯНКА</b></td><td><b>КООРДИНАТИ</b></td></tr>");
     for(let i = 1; i<data.length; i++){
@@ -432,7 +539,7 @@ layerControl.addOverlay(zonnnnna, "20км зона");
 
 
 
-load_jurnal(ftp_id,'Pasajiry.txt',function (data) { 
+load_jurnal(601000441,'Pasajiry.txt',function (data) { 
   for(let i = 1; i<data.length; i++){
     let m=data[i].split('|');
     mehanizator_adresa.push([m[0],m[1],m[2],parseFloat(m[3].split(',')[0]),parseFloat(m[3].split(',')[1])]);
@@ -480,6 +587,7 @@ if (Date.parse($('#fromtime1').val())/1000 > unit.getPosition().t){rest_units.pu
     }
 
     for(let i = 0; i<data.items.length; i++){
+       let data_gr_child =[];
       let name = data.items[i].$$user_name;
       let gr= '';
       let grup_id = data.items[i].$$user_units;
@@ -487,11 +595,16 @@ if (Date.parse($('#fromtime1').val())/1000 > unit.getPosition().t){rest_units.pu
       for(let ii = 0; ii<grup_id.length; ii++){
         if (!markerByUnit[grup_id[ii]]) continue;
         gr+=markerByUnit[grup_id[ii]]._tooltip._content+',';
+        data_gr_child.push({"value": name+"|||"+markerByUnit[grup_id[ii]]._tooltip._content+"|||"+grup_id[ii],"name": markerByUnit[grup_id[ii]]._tooltip._content});
       }
       gr = gr.slice(0, -1);
       unitsgrup[name] = gr;
       if (grup_id.length>0) {
-     
+
+serch_list_avto.push({ "value": name, "name": name+" ("+grup_id.length+")", "children": data_gr_child});
+
+
+
   
          if (name=='John Deere' || name=='Обприскувачі'|| name=='Навантажувачі'|| name=='Трактори'|| name=='Спецтехніка'){
           $('#m_lis').append($('<option selected>').text(name+" ("+data.items[i].$$user_units.length+")").val(name));
@@ -510,13 +623,25 @@ if (Date.parse($('#fromtime1').val())/1000 > unit.getPosition().t){rest_units.pu
           $('#planuvannya_lis').append($('<option>').text(name+" ("+data.items[i].$$user_units.length+")").val(name));
          }
          $('#lis1').append($('<option>').text(name+" ("+data.items[i].$$user_units.length+")").val(name)); 
-         $('#lis10').append($('<option>').text(name+" ("+data.items[i].$$user_units.length+")").val(name)); 
+         
         
 
          
       }
     }
+    let agregats = [];
+    agregats.push({ "value": "Диски|||Диски|||v21", "name": "Диски"});
+    agregats.push({ "value": "Культиватори|||Культиватори|||v22", "name": "Культиватори"});
+    agregats.push({ "value": "Боронування|||Боронування|||v23", "name": "Боронування"});
+    agregats.push({ "value": "Рихлитель|||Рихлитель|||v24", "name": "Рихлитель"});
+    agregats.push({ "value": "Оранка|||Оранка|||v25", "name": "Оранка"});
+    agregats.push({ "value": "Розкидачи|||Розкидачи|||v26", "name": "Розкидачи"});
+    agregats.push({ "value": "Оприскувачи|||Оприскувачи|||v27", "name": "Оприскувачи"});
+    agregats.push({ "value": "Сівалки|||Сівалки|||v28", "name": "Сівалки"});
+    agregats.push({ "value": "Комбайни|||Комбайни|||v29", "name": "Комбайни"});
+    agregats.push({ "value": "Без агрегату|||Без агрегату|||v30", "name": "Без агрегату"});
   
+
     $('#lis1').append('<optgroup label="Агрегати"><option value="v21">Диски</option><option value="v22">Культиватори</option><option value="v23">Боронування</option><option value="v24">Рихлитель</option><option value="v25">Оранка</option><option value="v26">Розкидачи</option><option value="v27">Оприскувачи</option><option value="v28">Сівалки</option><option value="v29">Комбайни</option><option value="v30">Без агрегату</option></optgroup>');
 
     //console.log(unitsgrup);
@@ -526,6 +651,139 @@ if (Date.parse($('#fromtime1').val())/1000 > unit.getPosition().t){rest_units.pu
     $("#r_lis").trigger("chosen:updated"); //обновляем select 
     $("#m_lis").trigger("chosen:updated"); //обновляем select  
     $("#lis1").trigger("chosen:updated"); //обновляем select 
+
+  const treeselect4 = new Treeselect({
+  parentHtmlContainer: document.querySelector('.container4'),
+  value: [-1],
+  options: [{ "value": -1, "name": 'ВСІ АВТО', children: serch_list_avto }],
+  //staticList: true,
+  //alwaysOpen: true,
+  saveScrollPosition:true,
+  openLevel: 1,
+  showTags: false,
+  tagsCountText: "вибрано",
+  placeholder: "ВИБІР АВТО",
+  direction: "top",
+  //appendToBody: true,
+  listClassName: 'llllll',
+ 
+  //isSingleSelect:true
+});
+treeselect4.srcElement.addEventListener('input', (e) => {   
+ load_list=[];
+ if(treeselect4.groupedValue[0]!=-1){
+    for (let ii = 0; ii<treeselect4.value.length; ii++){
+               let id = parseInt(treeselect4.value[ii].split('|||')[2]);
+               load_list.push(id);
+              }
+ }
+});
+
+  
+const treeselect2 = new Treeselect({
+  parentHtmlContainer: document.querySelector('.container1'),
+  value: [-1],
+  options: [{ "value": -1, "name": 'ВСІ АВТО', children: serch_list_avto },{ "value": 33, "name": 'Агрегати',isGroupSelectable: false, children: agregats  }],
+  staticList: true,
+  //alwaysOpen: true,
+  saveScrollPosition:true,
+  openLevel: 1,
+  showTags: false,
+  tagsCountText: "вибрано",
+  placeholder: "ВИБІР АВТО",
+  //appendToBody: true,
+  listClassName: 'lllll',
+ 
+  //isSingleSelect:true
+});
+
+
+
+ $('.container1').click(function(e) {
+    //treeselect2.value=["v30","v29"];
+    //treeselect2.updateValue(["v30","v29"])
+    let nn = e.target.title;
+    let spisok = treeselect2.value;
+    let vkl = false;
+    let val_id=0;
+    for(var i=0; i < spisok.length; i++){
+      let nmm = spisok[i].split('|||')[1];
+      if(nmm==nn){
+        val_id = spisok[i];
+        vkl=true; 
+        break;
+      }
+    }
+
+    filtr_data=[];
+    if(nn == 'Диски' ||nn == 'Культиватори' ||nn == 'Боронування' ||nn == 'Рихлитель' ||nn == 'Оранка' ||nn == 'Розкидачи' ||nn == 'Оприскувачи' ||nn == 'Сівалки' ||nn == 'Комбайни' || nn == 'Без агрегату'){
+      if(vkl){
+        if (nn=='Диски'){agregat = 21; }
+        if (nn=='Культиватори'){agregat = 22; }
+        if (nn=='Боронування'){agregat = 23; }
+        if (nn=='Рихлитель'){agregat = 24; }
+        if (nn=='Оранка'){agregat = 25; }
+        if (nn=='Розкидачи'){agregat = 27; }
+        if (nn=='Оприскувачи'){agregat = 26; }
+        if (nn=='Сівалки'){agregat = 28; }
+        if (nn=='Комбайни'){agregat = 29; }
+        if (nn=='Без агрегату'){agregat = 30; }
+        
+        for(var i=0; i < allunits.length; i++){
+          let idd =allunits[i].getId();
+          let nmm =allunits[i].getName();
+          let  mm = markerByUnit[idd];
+               mm.setOpacity(0);
+    
+               if (nn=='Без агрегату'){
+                if(nmm.indexOf('John')>=0 || nmm.indexOf('JD')>=0 || nmm.indexOf(' CL ')>=0|| nmm.indexOf('CASE')>=0 || nmm.indexOf(' NH ')>=0 ){
+                 mm.setOpacity(1);
+                 mm.setZIndexOffset(1000);
+                 filtr_data.push(idd);
+                }
+                }else{
+                  if(nmm.indexOf('John')>=0 || nmm.indexOf('JD')>=0 || nmm.indexOf(' CL ')>=0|| nmm.indexOf('CASE')>=0 || nmm.indexOf(' NH ')>=0 ){
+                    mm.setOpacity(0);
+                    mm.setZIndexOffset(1000);
+                    filtr_data.push(idd);
+                   }
+                }
+           }
+
+           treeselect2.updateValue(val_id);
+      }
+    }else{
+      for(var i=0; i < allunits.length; i++){
+        let idd =allunits[i].getId();
+        let  mm = markerByUnit[idd];
+             mm.setOpacity(0);
+         }
+      agregat=0;
+      for (let ii = 0; ii<spisok.length; ii++){
+        let id = parseInt(spisok[ii].split('|||')[2]);
+       filtr_data.push(id);
+       let mm = markerByUnit[id];
+        if(mm  && rux==0)mm.setOpacity(1);
+      }
+      if(vkl){
+        for(var i=0; i < allunits.length; i++){
+          let idd =allunits[i].getId();
+          let name = allunits[i].getName();
+          if(name==nn){
+            treeselect3.value=idd;
+            treeselect3.mount();
+            onUnitSelected();       
+            break;
+          }
+        } 
+      }
+ 
+    }
+    filtr=true;
+
+ })
+   
+
     });
 
     $('#lis1').on('change', function(evt, params) {
@@ -551,7 +809,6 @@ if (Date.parse($('#fromtime1').val())/1000 > unit.getPosition().t){rest_units.pu
 
 chuse(0,$("#lis1").chosen().val());
 
-
         });
   
   
@@ -561,6 +818,9 @@ chuse(0,$("#lis1").chosen().val());
 if ($("#lis1").chosen().val()[0]=="v000") {
   chuse(0,["v000"]);
 }
+
+
+
 
 if(params.selected.split('_')[0]=='поле'){
   let name = params.selected.split('_')[1];
@@ -598,17 +858,36 @@ if(params.selected.split('_')[0]=='поле'){
    onUnitSelected();
   });
 
+
+
+$('.main_menu').on('mouseover', function() {
+  if(this.style.backgroundColor!="rgb(51, 153, 255)" && this.style.backgroundColor!="rgb(231, 231, 231)"){
+ this.style.backgroundColor = '#b9b9b9ff'; // Change background color on hover
+ this.style.color = 'white'; // Change text color
+  }
+});
+$('.main_menu').on('mouseout', function() {
+  if(this.style.backgroundColor!="rgb(51, 153, 255)" && this.style.backgroundColor!="rgb(231, 231, 231)"){
+this.style.backgroundColor = 'initial'; 
+ this.style.color = 'initial'; 
+  }
+ 
+});
+
+
+
  $('#men1').click(function() {
   if ($('#marrr').is(':hidden')) {
     $('#marrr').show();
     $('#map').css('width', '50%');
-    this.style.background = '#b2f5b4';
+    this.style.background = '#3399FF';
     $('.leaflet-container').css('cursor','');
     marshruty_gruzovi();
   }else{
     $('#marrr').hide();
     $('#map').css('width', '100%');
-    this.style.background = '#e9e9e9';
+    this.style.background = '#ffffffff';
+    this.style.color = 'initial';
     $('.leaflet-container').css('cursor','');
     markerstart.setLatLng([0,0]); 
     markerend.setLatLng([0,0]);
@@ -637,12 +916,12 @@ if(params.selected.split('_')[0]=='поле'){
   $('#monitoring').hide();
   $('#geomodul').hide();
   clearGEO();
-  $('#men3').css({'background':'#e9e9e9'});
-  $('#men4').css({'background':'#e9e9e9'});
-  $('#men5').css({'background':'#e9e9e9'});
-  $('#men6').css({'background':'#e9e9e9'});
-  $('#men7').css({'background':'#e9e9e9'});
-  $('#men8').css({'background':'#e9e9e9'});
+  $('#men3').css({'background':'#ffffffff' , 'color':'#000000ff'});
+  $('#men4').css({'background':'#ffffffff' , 'color':'#000000ff'});
+  $('#men5').css({'background':'#ffffffff' , 'color':'#000000ff'});
+  $('#men6').css({'background':'#ffffffff' , 'color':'#000000ff'});
+  $('#men7').css({'background':'#ffffffff' , 'color':'#000000ff'});
+  $('#men8').css({'background':'#ffffffff' , 'color':'#000000ff'});
    clearGarbage(garbage);
   garbage=[];
   clearGarbage(garbagepoly);
@@ -666,7 +945,7 @@ if(params.selected.split('_')[0]=='поле'){
   if ($('#option').is(':hidden')) {
     $('#option').show();
     $('#map').css('width', '50%');
-    this.style.background = '#b2f5b4';
+    this.style.background = '#3399FF';
     $('#men3').css({'box-shadow':'none'});
     $('.leaflet-container').css('cursor','');
     markerstart.setLatLng([0,0]); 
@@ -675,7 +954,8 @@ if(params.selected.split('_')[0]=='поле'){
   }else{
     $('#option').hide();
     $('#map').css('width', '100%');
-    this.style.background = '#e9e9e9';
+    this.style.background = '#ffffffff';
+     this.style.color = '#000000ff';
     $('#men3').css({'box-shadow':'none'});
   }
 $('#marrr').hide();
@@ -686,12 +966,12 @@ $('#logistika').hide();
 $('#monitoring').hide();
 $('#geomodul').hide();
 clearGEO(); 
-$('#men1').css({'background':'#e9e9e9'});
-$('#men4').css({'background':'#e9e9e9'});
-$('#men5').css({'background':'#e9e9e9'});
-$('#men6').css({'background':'#e9e9e9'});
-$('#men7').css({'background':'#e9e9e9'});
-$('#men8').css({'background':'#e9e9e9'});
+$('#men1').css({'background':'#ffffffff', 'color':'#000000ff'});
+$('#men4').css({'background':'#ffffffff', 'color':'#000000ff'});
+$('#men5').css({'background':'#ffffffff', 'color':'#000000ff'});
+$('#men6').css({'background':'#ffffffff', 'color':'#000000ff'});
+$('#men7').css({'background':'#ffffffff', 'color':'#000000ff'});
+$('#men8').css({'background':'#ffffffff', 'color':'#000000ff'});
  clearGarbage(garbage);
   garbage=[];
   clearGarbage(garbagepoly);
@@ -720,7 +1000,7 @@ map.invalidateSize();
     if ($('#unit_info').is(':hidden')) {
       $('#unit_info').show();
       $('#map').css('width', '50%');
-      this.style.background = '#b2f5b4';
+      this.style.background = '#3399FF';
       $('.leaflet-container').css('cursor','');
       markerstart.setLatLng([0,0]); 
      markerend.setLatLng([0,0]);
@@ -728,7 +1008,8 @@ map.invalidateSize();
     }else{
      $('#unit_info').hide();
      $('#map').css('width', '100%');
-     this.style.background = '#e9e9e9';
+     this.style.background = '#ffffffff';
+      this.style.color = '#000000ff';
      $('.leaflet-container').css('cursor','');
     }
     $('#marrr').hide();
@@ -738,12 +1019,12 @@ map.invalidateSize();
     $('#monitoring').hide();
     $('#geomodul').hide();
     clearGEO(); 
-    $('#men3').css({'background':'#e9e9e9'});
-    $('#men1').css({'background':'#e9e9e9'});
-    $('#men5').css({'background':'#e9e9e9'});
-    $('#men6').css({'background':'#e9e9e9'});
-    $('#men7').css({'background':'#e9e9e9'});
-    $('#men8').css({'background':'#e9e9e9'});
+    $('#men3').css({'background':'#ffffffff', 'color':'#000000ff'});
+    $('#men1').css({'background':'#ffffffff', 'color':'#000000ff'});
+    $('#men5').css({'background':'#ffffffff', 'color':'#000000ff'});
+    $('#men6').css({'background':'#ffffffff', 'color':'#000000ff'});
+    $('#men7').css({'background':'#ffffffff', 'color':'#000000ff'});
+    $('#men8').css({'background':'#ffffffff', 'color':'#000000ff'});
      clearGarbage(garbage);
   garbage=[];
   clearGarbage(garbagepoly);
@@ -768,7 +1049,7 @@ map.invalidateSize();
   if ($('#zupinki').is(':hidden')) {
     $('#zupinki').show();
     $('#map').css('width', '80%');
-    this.style.background = '#b2f5b4';
+    this.style.background = '#3399FF';
     $('.leaflet-container').css('cursor','');
     markerstart.setLatLng([0,0]); 
     markerend.setLatLng([0,0]);
@@ -776,7 +1057,8 @@ map.invalidateSize();
   }else{
    $('#zupinki').hide();
    $('#map').css('width', '100%');
-   this.style.background = '#e9e9e9';
+   this.style.background = '#ffffffff';
+    this.style.color = '#000000ff';
   }
   $('#marrr').hide();
   $('#option').hide();
@@ -785,12 +1067,12 @@ map.invalidateSize();
   $('#monitoring').hide();
   $('#geomodul').hide();
   clearGEO(); 
-  $('#men3').css({'background':'#e9e9e9'});
-  $('#men1').css({'background':'#e9e9e9'});
-  $('#men4').css({'background':'#e9e9e9'});
-  $('#men6').css({'background':'#e9e9e9'});
-  $('#men7').css({'background':'#e9e9e9'});
-  $('#men8').css({'background':'#e9e9e9'});
+  $('#men3').css({'background':'#ffffffff', 'color':'#000000ff'});
+  $('#men1').css({'background':'#ffffffff', 'color':'#000000ff'});
+  $('#men4').css({'background':'#ffffffff', 'color':'#000000ff'});
+  $('#men6').css({'background':'#ffffffff', 'color':'#000000ff'});
+  $('#men7').css({'background':'#ffffffff', 'color':'#000000ff'});
+  $('#men8').css({'background':'#ffffffff', 'color':'#000000ff'});
    clearGarbage(garbage);
   garbage=[];
   clearGarbage(garbagepoly);
@@ -815,7 +1097,7 @@ map.invalidateSize();
   if ($('#logistika').is(':hidden')) {
     $('#logistika').show();
     $('#map').css('width', '50%');
-    this.style.background = '#b2f5b4';
+    this.style.background = '#3399FF';
       $('.leaflet-container').css('cursor','crosshair');
       markerstart.setLatLng([0,0]); 
       markerend.setLatLng([0,0]);
@@ -824,7 +1106,8 @@ map.invalidateSize();
   }else{
    $('#logistika').hide();
    $('#map').css('width', '100%');
-   this.style.background = '#e9e9e9';
+   this.style.background = '#ffffffff';
+   this.style.color = '#000000ff';
    $('.leaflet-container').css('cursor','');
   }
   $('#marrr').hide();
@@ -834,12 +1117,12 @@ map.invalidateSize();
   $('#monitoring').hide();
   $('#geomodul').hide();
   clearGEO(); 
-  $('#men3').css({'background':'#e9e9e9'});
-  $('#men1').css({'background':'#e9e9e9'});
-  $('#men4').css({'background':'#e9e9e9'});
-  $('#men5').css({'background':'#e9e9e9'});
-  $('#men7').css({'background':'#e9e9e9'});
-  $('#men8').css({'background':'#e9e9e9'});
+  $('#men3').css({'background':'#ffffffff', 'color':'#000000ff'});
+  $('#men1').css({'background':'#ffffffff', 'color':'#000000ff'});
+  $('#men4').css({'background':'#ffffffff', 'color':'#000000ff'});
+  $('#men5').css({'background':'#ffffffff', 'color':'#000000ff'});
+  $('#men7').css({'background':'#ffffffff', 'color':'#000000ff'});
+  $('#men8').css({'background':'#ffffffff', 'color':'#000000ff'});
    clearGarbage(garbage);
   garbage=[];
   clearGarbage(garbagepoly);
@@ -864,7 +1147,7 @@ map.invalidateSize();
   if ($('#monitoring').is(':hidden')) {
     $('#monitoring').show();
     $('#map').css('width', '65%');
-    this.style.background = '#b2f5b4';
+    this.style.background = '#3399FF';
       $('.leaflet-container').css('cursor','');
       markerstart.setLatLng([0,0]); 
       markerend.setLatLng([0,0]);
@@ -872,8 +1155,8 @@ map.invalidateSize();
   }else{
    $('#monitoring').hide();
    $('#map').css('width', '100%');
-   this.style.background = '#e9e9e9';
-  
+   this.style.background = '#ffffffff';
+   this.style.color = '#000000ff';
   }
   $('#marrr').hide();
   $('#option').hide();
@@ -882,12 +1165,12 @@ map.invalidateSize();
   $('#logistika').hide();
   $('#geomodul').hide();
   clearGEO(); 
-  $('#men3').css({'background':'#e9e9e9'});
-  $('#men1').css({'background':'#e9e9e9'});
-  $('#men4').css({'background':'#e9e9e9'});
-  $('#men5').css({'background':'#e9e9e9'});
-  $('#men6').css({'background':'#e9e9e9'});
-  $('#men8').css({'background':'#e9e9e9'});
+  $('#men3').css({'background':'#ffffffff', 'color':'#000000ff'});
+  $('#men1').css({'background':'#ffffffff', 'color':'#000000ff'});
+  $('#men4').css({'background':'#ffffffff', 'color':'#000000ff'});
+  $('#men5').css({'background':'#ffffffff', 'color':'#000000ff'});
+  $('#men6').css({'background':'#ffffffff', 'color':'#000000ff'});
+  $('#men8').css({'background':'#ffffffff', 'color':'#000000ff'});
    clearGarbage(garbage);
   garbage=[];
   clearGarbage(garbagepoly);
@@ -911,7 +1194,7 @@ $("#men8").on("click", function (){
   if ($('#geomodul').is(':hidden')) {
     $('#geomodul').show();
     $('#map').css('width', '50%');
-    this.style.background = '#b2f5b4';
+    this.style.background = '#3399FF';
       $('.leaflet-container').css('cursor','');
       markerstart.setLatLng([0,0]); 
       markerend.setLatLng([0,0]);
@@ -919,8 +1202,8 @@ $("#men8").on("click", function (){
   }else{
    $('#geomodul').hide();
    $('#map').css('width', '100%');
-   this.style.background = '#e9e9e9';
-  
+   this.style.background = '#ffffffff';
+   this.style.color = '#000000ff';
   }
   $('#marrr').hide();
   $('#option').hide();
@@ -929,12 +1212,12 @@ $("#men8").on("click", function (){
   $('#logistika').hide();
   $('#monitoring').hide();
   clearGEO(); 
-  $('#men3').css({'background':'#e9e9e9'});
-  $('#men1').css({'background':'#e9e9e9'});
-  $('#men4').css({'background':'#e9e9e9'});
-  $('#men5').css({'background':'#e9e9e9'});
-  $('#men6').css({'background':'#e9e9e9'});
-  $('#men7').css({'background':'#e9e9e9'});
+  $('#men3').css({'background':'#ffffffff', 'color':'#000000ff'});
+  $('#men1').css({'background':'#ffffffff', 'color':'#000000ff'});
+  $('#men4').css({'background':'#ffffffff', 'color':'#000000ff'});
+  $('#men5').css({'background':'#ffffffff', 'color':'#000000ff'});
+  $('#men6').css({'background':'#ffffffff', 'color':'#000000ff'});
+  $('#men7').css({'background':'#ffffffff', 'color':'#000000ff'});
   clearGarbage(garbage);
   garbage=[];
   clearGarbage(garbagepoly);
@@ -968,7 +1251,8 @@ $("#men8").on("click", function (){
 // Unit choosed from <select>
   function onUnitSelected() {  
      
-    var unitId = parseInt($("#lis0").chosen().val());
+    var unitId = treeselect3.value;
+        
     var popupp = markerByUnit[unitId];
     
     if (unitId === 0) return;
@@ -987,7 +1271,7 @@ $("#men8").on("click", function (){
       return;
     }
     
-  //map.setView(popupp.getLatLng(), map.getZoom()); 
+  map.setView(popupp.getLatLng(), map.getZoom()); 
    popupp.openPopup();
      navigator.clipboard.writeText(unit.getName());
      show_track ();     
@@ -1135,6 +1419,16 @@ function initMap() {
     doubleClickZoom: false,
     zoomAnimation: false,
     animate: false,
+    zoomControl: false,
+    contextmenu: true,
+     contextmenuWidth: 140,
+       contextmenuItems: [{
+         text: 'Очистити треки',
+          callback: clear
+       }, {
+         text: 'Очистити маркери',
+         callback: clear2
+       }]
     //zoomDelta: 0.1,
     //zoomSnap: 0,
     //wheelPxPerZoomLevel: 100
@@ -1235,7 +1529,9 @@ if ($('#zz17').is(':visible') ) {
       if($('#log_marh_tb').is(':visible') ) { add_point(e); }
   });
   
-
+  L.control.zoom({
+    position: 'topleft'
+}).addTo(map);
 
  map.on('click', function(e) { 
  if($('#zz1').is(':visible') || $('#zz2').is(':visible') || $('#zz3').is(':visible')) { RemainsFuel(e); }
@@ -1302,54 +1598,74 @@ let areaSelection = new leafletAreaSelection.DrawAreaSelection({
 };
 L.control.ruler(options).addTo(map);
 
+
+L.easyButton('<img src="route.png" title="очистити мапу від треків">', function(){
+  clear();
+   clear2();
+ }).addTo(map);
+ 
+
+
+
+ let light =1;
+ L.easyButton('<img src="light.png" title="нічний режим">', function(){
+ if(light ==1){
+ $(document.documentElement).css('filter', 'invert(100%) hue-rotate(180deg) brightness(95%) contrast(95%)');
+ $(".leaflet-marker-icon").css('filter', 'invert(100%) hue-rotate(180deg) brightness(100%) contrast(100%)');
+ $(".leaflet-layer").css('filter', 'grayscale(100%)');
+ light=0;
+ }else{
+ $(document.documentElement).css('filter', 'none');
+ $(".leaflet-marker-icon").css('filter', 'none');
+ $(".leaflet-layer").css('filter', 'none');
+ light=1;
+ }
+}).addTo(map);
+
+  L.easyButton({
+    states: [{
+            stateName: 'zoom-to-forest',        // name the state
+            icon:      '<img src="omline.png">',               // and define its properties
+            title:     'ввімкнути онлайн стеження',      // like its title
+            onClick: function(btn, map) {       // and its callback
+                map.setView([51.6760,33.9195],12);
+                $('#niz').hide();
+                $('#map').css('height', 'calc(100vh - 34px)');
+                btn.state('zoom-to-school');    // change state on click!
+            }
+        }, {
+            stateName: 'zoom-to-school',
+            icon:      '<img src="ofline.png">',
+            title:     'вимкнути онлайн стеження',
+            onClick: function(btn, map) {
+                map.setView([51.5507,33.3493],12);
+                $('#niz').show();
+                $('#map').css('height', 'calc(100vh - 124px)');
+                btn.state('zoom-to-forest');
+            }
+    }]
+}).addTo(map);
+
 }
 
 //let ps = prompt('');
 //if(ps==55555){
 // execute when DOM ready
 $(document).ready(function () {
-
-
-
-// const svc = 'token/login';
-// const data = new FormData();
-// data.append('svc', svc);
-// //data.append('params', JSON.stringify({ token: '0999946a10477f4854a9e6f27fcbe8424E7222985DA6B8C3366AABB4B94147D6C5BAE69F'}));
-
-// fetch('https://local3.ingps.com.ua/wialon/ajax.html', {
-//   method: 'POST',
-//    headers: {
-//     'Content-Type': 'application/x-www-form-urlencoded', // Указываем тип контента
-//   },
-//   body: data,
-// })
-// .then(response => response.json())
-// .then(data => {
-//   console.log('Success:', data);
-// })
-// .catch((error) => {
-//   console.error('Error:', error);
-// });
-
-
-
-
   // init session
   //wialon.core.Session.getInstance().initSession("https://local3.ingps.com.ua",null,0x800);
-   wialon.core.Session.getInstance().initSession("https://hst-api.wialon.com",null,0x800);
-  
+  wialon.core.Session.getInstance().initSession("https://hst-api.wialon.com",null,0x800);
+
   wialon.core.Session.getInstance().loginToken(TOKEN, "", // try to login
     function (code) { // login callback
       // if error code - print error message
       if (code){ msg(wialon.core.Errors.getErrorText(code)); return; }
       msg('Зеднання з Глухів - успішно');
+    
       initMap();
       init(); // when login suceed then run init() function
-      
-      
     }
   );
-  
 });
 
 
@@ -1364,8 +1680,8 @@ $(document).ready(function () {
 
 
 function show_track (time1,time2) {
-
-	var unit_id =  $("#lis0").chosen().val(),
+	//var unit_id =  $("#lis0").chosen().val(),
+  var unit_id =  treeselect3.value,
 		sess = wialon.core.Session.getInstance(), // get instance of current Session	
 		renderer = sess.getRenderer(),
 		cur_day = new Date(),	
@@ -1379,7 +1695,7 @@ function show_track (time1,time2) {
     to = Date.parse(time2)/1000;
     from = Date.parse(time1)/1000;
     }
-         
+     
 
 		if (!unit) return; // exit if no unit
 
@@ -2149,8 +2465,8 @@ function track_marshruta(evt){
  //msg(this.rowIndex);
  // msg(data_zvit[this.rowIndex-1][2]);
  // msg(this.id);
- $("#lis0").chosen().val(this.id);     
- $("#lis0").trigger("chosen:updated");
+ treeselect3.value=parseInt(this.id);
+ treeselect3.mount();
  show_track(data_zvit[this.rowIndex-1][11],data_zvit[this.rowIndex-1][12]);
   markerByUnit[this.id].openPopup();
 }
@@ -2162,6 +2478,7 @@ function track_marshruta(evt){
 //=================Data===================================================================================
 Global_DATA=[];
 function UpdateGlobalData(t2=0,idrep=zvit2,i=0){
+    upd=true;
     if(i==0){
      $('#eeew').prop("disabled", true);
      if($('#fromtime1').val()!=from111 || $('#fromtime2').val()!=from222){
@@ -2170,10 +2487,11 @@ function UpdateGlobalData(t2=0,idrep=zvit2,i=0){
        from222=$('#fromtime2').val();
        t2=Date.parse($('#fromtime2').val())/1000;
       }else{ 
-        if($("#gif").is(":checked"))from222 =(new Date(Date.now() - tzoffset)).toISOString().slice(0, -8);
+        if(auto_play==true)from222 =(new Date(Date.now() - tzoffset)).toISOString().slice(0, -8);
        $('#fromtime2').val(from222);
        t2=Date.parse($('#fromtime2').val())/1000;
       }
+
     } 
     if(i < unitslist.length){
         $('#log').empty();
@@ -2189,6 +2507,8 @@ function UpdateGlobalData(t2=0,idrep=zvit2,i=0){
       $('button').prop("disabled", false);
       $('#log').empty();
       msg('Завантажено  ---'+from222);
+      sec =450;
+      upd=false;
     }   
 }
 
@@ -2197,21 +2517,17 @@ function CollectGlobalData(t2,idrep,i,unit){ // execute selected report
   let id_res=RES_ID, id_unit = unit.getId(), ii=i;
   if(Global_DATA[ii]==undefined){Global_DATA.push([[id_unit,unit.getName(),Date.parse($('#fromtime1').val())/1000]])}
   let t1=Global_DATA[ii][0][2];
-  let vibor = $("#lis10").val();
 
-  if($('#uni_data').val()!=""){
-    let str =$('#uni_data').val().split(',');
+  if(load_list.length!=0){
     let ok=0;
-    str.forEach((element) => {if(unit.getName().indexOf(element)>=0){ok=1}});
-    if(ok==0){ii++; UpdateGlobalData(t2,idrep,ii);return;}
-    }else{
-    if(vibor!="11_ККЗ"){
-        let str =unitsgrup[vibor].split(',');
-        let ok=0;
-        str.forEach((element) => {if(unit.getName().indexOf(element)>=0){ok=1}});
-      if(ok==0){ii++; UpdateGlobalData(t2,idrep,ii);return;}
+   for (let j=0; j<load_list.length; j++){
+      if(load_list[j]==id_unit){
+       ok=1;
+       break;
       }
-    }
+   }
+   if(ok==0){ii++; UpdateGlobalData(t2,idrep,ii);return;}
+   }
 
   //if($("#gif").is(":checked")) {for (let iii=0; iii<list_zavatajennya.length; iii++){if(list_zavatajennya[iii]==id_unit){break;}if(list_zavatajennya[iii].length-1==iii){ii++; UpdateGlobalData(t2,idrep,ii);return;}}}
 	if(!id_res){ msg("Select resource"); return;} // exit if no resource selected
@@ -2233,7 +2549,7 @@ function CollectGlobalData(t2,idrep,i,unit){ // execute selected report
         let it=0;
         let litry=0;
         let datt=0;
-        for (let j=4; j<headers.length; j++) {if (headers[j].indexOf('Топливо')>=0 || headers[j].indexOf('Паливо')>=0 || headers[j].indexOf('ДУТ ')>=0 || headers[j].indexOf('ДРП ')>=0){it=j;break;}}
+        for (let j=4; j<headers.length; j++) {if (headers[j].indexOf('Топливо')>=0 || headers[j].indexOf('Паливо')>=0 || headers[j].indexOf('ДУТ ')>=0 || headers[j].indexOf('ДРП ')>=0 ){it=j; break;}}
         data.getTableRows(0, 0, tables[0].rows,function( code, rows) { 
           if (code) {console.log(wialon.core.Errors.getErrorText(code)); ii++; UpdateGlobalData(t2,idrep,ii);return;} 
           for(let j in rows) { 
@@ -2344,33 +2660,73 @@ function position(t)  {
   }
 }
     
+
 var tik =0;
-var sec =3000;
+var sec =700;
 var sec2=400;
 setInterval(function() {
   sec2--;
   if (sec2 <= 0 ) {jurnal_online();sec2=2000;}
-if($("#gif").is(":checked")) {
+if(auto_play==true) {
   //msg(sec/10);
     let t=Date.parse($('#f').text())+parseInt(slider_sp.value);
     sec++;
     tik++;
     slider.value=(t-Date.parse($('#fromtime1').val()))/(Date.parse($('#fromtime2').val())-Date.parse($('#fromtime1').val()))*2000;
     if (slider.value >= 1999) {tik =1800;slider.value=tik; t = Date.parse($('#fromtime1').val())+(Date.parse($('#fromtime2').val())-Date.parse($('#fromtime1').val()))/2000*tik;}
-    if (sec > 6000) {
-    sec =0;
-    UpdateGlobalData(0,zvit2,0);
+    if (sec > 1500) {
+    if(upd==false){
+      sec =0;
+      upd=true;
+      UpdateGlobalData(0,zvit2,0);
     }
-    if (sec == 2000 && $("#monitoring_gif").is(":checked")) {Monitoring2();}
-    if (sec == 1500 && newWindow && newWindow.closed==false) {update_popUP();}
+     if (sec > 2000)sec =2000;
+    }
+    if (sec == 700 && auto_play==true && upd==false) {Monitoring2();}
+    if (sec == 500 && newWindow && newWindow.closed==false && upd==false) {update_popUP();}
     
     if(t>Date.parse($('#fromtime2').val()))t=Date.parse($('#fromtime2').val());
     slider.value=(t-Date.parse($('#fromtime1').val()))/(Date.parse($('#fromtime2').val())-Date.parse($('#fromtime1').val()))*2000;
     position(t);
   }
+  if(kn==2){
+    let t=Date.parse($('#f').text())-3000;
+    if(t<Date.parse($('#fromtime1').val()))t=Date.parse($('#fromtime1').val());
+    slider.value=(t-Date.parse($('#fromtime1').val()))/(Date.parse($('#fromtime2').val())-Date.parse($('#fromtime1').val()))*2000;
+    position(t);
+}
+if(kn==1){
+      let t=Date.parse($('#f').text())+3000;
+    if(t>Date.parse($('#fromtime2').val()))t=Date.parse($('#fromtime2').val());
+    slider.value=(t-Date.parse($('#fromtime1').val()))/(Date.parse($('#fromtime2').val())-Date.parse($('#fromtime1').val()))*2000;
+    position(t);
+}
   }, 60);
  
-
+  let kn=0;
+  let auto_play=false;
+   $("#front").mousedown(function() {
+   kn=1;
+  });
+   $("#bak").mousedown(function() {
+   kn=2;
+  });
+  document.addEventListener("mouseup", function(event) {
+   kn=0
+  });
+  
+   $("#play").click(function() {
+    if(auto_play==false){
+      auto_play=true;
+       this.style.background = '#3399FF';
+    }else{
+      auto_play=false;
+      this.style.background = '#ffffffff';
+    }
+   
+  });
+      
+  
     
     
 var icl2 =-1;
@@ -2519,8 +2875,8 @@ if(data_zup[i][3].split(':').reverse().reduce((acc, n, iy) => acc + n * (60 ** i
                    var cpdataa='';
                  cpdataa += e.target._popup._content.split('<br />')[0] + '\t' +e.target._popup._content.split('<br />')[1] + '\t' +e.target._popup._content.split('<br />')[2] + ' \t' + e.target._popup._content.split('<br />')[3];
   navigator.clipboard.writeText(cpdataa);  
-  $("#lis0").chosen().val(unitsID[e.target._popup._content.split('<br />')[0]]); 
-  $("#lis0").trigger("chosen:updated");
+  treeselect3.value=unitsID[e.target._popup._content.split('<br />')[0]];
+  treeselect3.mount();
   layers[0]=0;
 
   var loo = (e.target._popup._content.split('<br />')[2]).split(':')[0]*3600000;
@@ -2552,8 +2908,8 @@ if(data_zup[i][3].split(':').reverse().reduce((acc, n, iy) => acc + n * (60 ** i
   navigator.clipboard.writeText(cpdataa);  
   zup_hist.push(e.target._popup._content.split('<br />')[1]+e.target._popup._content.split('<br />')[2]);
   if(zup_hist.length>700){zup_hist.shift();}
-  $("#lis0").chosen().val(unitsID[e.target._popup._content.split('<br />')[0]]); 
-  $("#lis0").trigger("chosen:updated");
+  treeselect3.value=unitsID[e.target._popup._content.split('<br />')[0]];
+  treeselect3.mount();
   layers[0]=0;
   var loo = (e.target._popup._content.split('<br />')[2]).split(':')[0]*3600000;
   var t1=  new Date(Date.parse(e.target._popup._content.split('<br />')[1])-3600000);
@@ -2621,135 +2977,39 @@ function clear2(){
  let filtr=false;
  let filtr_data=[];
 function chuse(a,vibor) {
-  var nmm,mm,idd;
-  let str = ' ';
-  let grup = null;
-
-
-  if(!vibor){ str=this.id; }else{
-    for(var i=0; i < vibor.length; i++){
-      if(unitsgrup[vibor[i]]){
-        if (i==0){ str += unitsgrup[vibor[i]];
-      }else{
-        str += ','+unitsgrup[vibor[i]];
-      }
-      grup = true;
-    }else{
-      str = vibor[i]; 
-      grup = null;
-      break;
-      }
-    }
-  }
-
-
- 
-  if (str=='v9'){
+  if (this.id=='v9'){
     if(rux==0){
       rux = 1;
-      $('#v9').css("background", '#b2f5b4');
+      $('#v9').css("background", '#3399FF');
+for(var i=0; i < allunits.length; i++){
+ let mm = markerByUnit[allunits[i].getId()];
+ mm.setOpacity(0);
+}
+
     }else{
       rux = 0;
       let t=Date.parse($('#f').text());
       position(t);
-      $('#v9').css({'background':'#e9e9e9'});
-    } 
-    vibor = $("#lis1").chosen().val();
-    for(var i=0; i < vibor.length; i++){
-      if(unitsgrup[vibor[i]]){
-        if (i==0){ str += unitsgrup[vibor[i]];
+      $('#v9').css({'background':'#ffffffff'});
+      if(filtr_data.length>0){
+        for(let v = 0; v<filtr_data.length; v++){ 
+         let mm = markerByUnit[filtr_data[v]];
+         mm.setOpacity(1);
+        } 
       }else{
-        str += ','+unitsgrup[vibor[i]];
-      }
-      grup = true;
-    }else{
-      str = vibor[i]; 
-      grup = null;
-      break;
-      }
-    }
- 
-
-  }else{
-    agregat=0;
-    filtr_data=[];
-  }
-  if (str=='v21'){agregat = 21; }
-  if (str=='v22'){agregat = 22; }
-  if (str=='v23'){agregat = 23; }
-  if (str=='v24'){agregat = 24; }
-  if (str=='v25'){agregat = 25; }
-  if (str=='v26'){agregat = 26; }
-  //if (str=='v27'){if(rux==0)rux = 27;}
-  if (str=='v28'){agregat = 28; }
-  if (str=='v29'){agregat = 29; }
-  if (str=='v30'){agregat = 30; }
-  
-for(var i=0; i < allunits.length; i++){
-nmm =allunits[i].getName();
-idd =allunits[i].getId();
-mm = markerByUnit[idd];
- mm.setOpacity(0);
-
- if (grup){
-  let strr = str.split(',');
- strr.forEach((element) => {
-  if(element.indexOf(nmm)>=0){
-    mm.setOpacity(1);
-    mm.setZIndexOffset(1000);
-    filtr=true; 
-    filtr_data.push(idd);
-  }
-});
- if(rux==1){mm.setOpacity(0);} 
- continue;
- }
-     if (str=='v1'){
-      mm.setOpacity(1);
-      filtr=false; 
-     }
-     
-   
-
-     if (str=='v27'){
-      if(nmm.indexOf('CASE 4430')>=0 || nmm.indexOf('R4045')>=0|| nmm.indexOf('612R')>=0){
-       mm.setOpacity(1);
-       mm.setZIndexOffset(1000);
-       filtr=true; 
-       filtr_data.push(idd);
-      }
-      }
-
-     if (str=='v30'){
-      if(nmm.indexOf('John')>=0 || nmm.indexOf('JD')>=0 || nmm.indexOf(' CL ')>=0|| nmm.indexOf('CASE')>=0 || nmm.indexOf(' NH ')>=0 ){
-       mm.setOpacity(1);
-       mm.setZIndexOffset(1000);
-       filtr=true; 
-       filtr_data.push(idd);
-      }
-      }
-
-      if (str=='v21'||str=='v22'||str=='v23'||str=='v24'||str=='v25'||str=='v26'||str=='v28'||str=='v29'){
-        if(nmm.indexOf('John')>=0 || nmm.indexOf('JD')>=0 || nmm.indexOf(' CL ')>=0|| nmm.indexOf('CASE')>=0 || nmm.indexOf(' NH ')>=0 ){
-         mm.setOpacity(0);
-         mm.setZIndexOffset(1000);
-         filtr=true; 
-         filtr_data.push(idd);
+         for(let v = 0; v<allunits.length; v++){ 
+         let mm = markerByUnit[allunits[v].getId()];
+         mm.setOpacity(1);
         }
-        }
-
-        if (str=='v000'){
-          if(nmm.indexOf( $("#lis0 option:selected").text())>=0){
-           mm.setOpacity(1);
-           mm.setZIndexOffset(1000);
-           filtr=true; 
-           filtr_data.push(idd);
-          }
-          }
-
-      if(rux==1){mm.setOpacity(0);} 
+      }
       
-}
+      } 
+      
+      
+    
+   
+   
+  }
 }
 
 
@@ -2874,56 +3134,57 @@ for ( j = 1; j < tableRow.length; j++){
       }
 
 
-  $('#grafik').hide();
-  $('#v11').click(menu10);
-  function menu10() {
-if ($('#grafik').is(':hidden')) {
-  $('#grafik').show();
-  $('#map').css('height', '470px');
-  $('#marrr').css('height', '470px');
-  $('#option').css('height', '470px');
-  $('#unit_info').css('height', '470px');
-  $('#zupinki').css('height', '470px');
-  $('#logistika').css('height', '470px');
-  $('#monitoring').css('height', '470px');
-  $('#geomodul').css('height', '470px');
-  this.style.background = '#b2f5b4';
-  show_gr();
-}else{
-  $('#grafik').hide();
-  $('#map').css('height', '750px');
-  $('#marrr').css('height', '750px');
-   $('#option').css('height', '750px');
-  $('#unit_info').css('height', '750px');
-  $('#zupinki').css('height', '750px');
-  $('#logistika').css('height', '750px');
-  $('#monitoring').css('height', '750px');
-  $('#geomodul').css('height', '750px');
-  this.style.background = '#e9e9e9';
-}
-    map.invalidateSize();
+      $('#grafik').hide();
+      $('#v11').click(menu10);
+      function menu10() {
+    if ($('#grafik').is(':hidden')) {
+      $('#grafik').show();
+      $('#map').css('height', 'calc(100vh - 404px)');
+      $('#marrr').css('height', 'calc(100vh - 404px)');
+      $('#option').css('height', 'calc(100vh - 404px)');
+      $('#unit_info').css('height', 'calc(100vh - 404px)');
+      $('#zupinki').css('height', 'calc(100vh - 404px)');
+      $('#logistika').css('height', 'calc(100vh - 404px)');
+      $('#monitoring').css('height', 'calc(100vh - 404px)');
+      $('#geomodul').css('height', 'calc(100vh - 404px)');
+      this.style.background = '#3399FF';
+      show_gr();
+    }else{
+      $('#grafik').hide();
+      $('#map').css('height', 'calc(100vh - 124px)');
+      $('#marrr').css('height', 'calc(100vh - 124px)');
+       $('#option').css('height', 'calc(100vh - 124px)');
+      $('#unit_info').css('height', 'calc(100vh - 124px)');
+      $('#zupinki').css('height', 'calc(100vh - 124px)');
+      $('#logistika').css('height', 'calc(100vh - 124px)');
+      $('#monitoring').css('height', 'calc(100vh - 124px)');
+      $('#geomodul').css('height', 'calc(100vh - 124px)');
+      this.style.background = '#ffffffff';
+       this.style.color = '#000000ff';
     }
+        map.invalidateSize();
+        }
  
   
-  function show_gr(a,b) {
-    s1=a;
-    s2=b;
-    var unid =  parseInt($("#lis0").chosen().val());
-        if ($('#grafik').is(':hidden')==false){
-          $('#v11').css({'background':'#b2f5b4'});
-          let data_graf = [];
-          for(let i = 0; i<Global_DATA.length; i++){ 
-            let idd = Global_DATA[i][0][0];
-            if(idd==unid){
-              for (let ii = 1; ii<Global_DATA[i].length-1; ii+=1){
-                data_graf.push([Global_DATA[i][ii][0],Global_DATA[i][ii][1],Global_DATA[i][ii][2],Global_DATA[i][ii][3]]);
-              } 
-              break;
-            }   
+        function show_gr(a,b) {
+          s1=a;
+          s2=b;
+          var unid =  treeselect3.value;
+              if ($('#grafik').is(':hidden')==false){
+                $('#v11').css({'background':'#3399FF'});
+                let data_graf = [];
+                for(let i = 0; i<Global_DATA.length; i++){ 
+                  let idd = Global_DATA[i][0][0];
+                  if(idd==unid){
+                    for (let ii = 1; ii<Global_DATA[i].length-1; ii+=1){
+                      data_graf.push([Global_DATA[i][ii][0],Global_DATA[i][ii][1],Global_DATA[i][ii][2],Global_DATA[i][ii][3]]);
+                    } 
+                    break;
+                  }   
+                }
+                drawChart(data_graf);
           }
-          drawChart(data_graf);
-    }
-  }
+        }
 
 
 
@@ -3219,8 +3480,8 @@ function Naryady_start(){
    if(en == '0')en = $('#fromtime2').val();
    slider.value=(Date.parse(st)-Date.parse($('#fromtime1').val()))/(Date.parse($('#fromtime2').val())-Date.parse($('#fromtime1').val()))*2000;
    position(Date.parse(st));
-    $("#lis0").chosen().val(id);     
-    $("#lis0").trigger("chosen:updated");
+    treeselect3.value=id;
+    treeselect3.mount();
     clear();
     
     let tableRow =document.querySelectorAll('#obrobkatehnika tr');
@@ -3803,8 +4064,8 @@ $("#robota_polya_tb").on("click", function (evt){
     let name = row.cells[6].textContent;
      for (let i = 0; i<geozones.length; i++){
      if(geozones[i].zone.n == name){
-     let y=((geozones[i]._bounds._northEast.lat+geozones[i]._bounds._southWest.lat)/2).toFixed(5);
-     let x=((geozones[i]._bounds._northEast.lng+geozones[i]._bounds._southWest.lng)/2).toFixed(5);
+      let y=((geozones[i]._bounds._northEast.lat+geozones[i]._bounds._southWest.lat)/2).toFixed(5);
+      let x=((geozones[i]._bounds._northEast.lng+geozones[i]._bounds._southWest.lng)/2).toFixed(5);
       map.setView([y,x],map.getZoom(),{animate: false});
            geozonepoint.length =0;
            geozonepointTurf.length =0;
@@ -3897,8 +4158,8 @@ $("#reestr_save_BT").on("click", function (evt){
 function track_TestNavigation(evt){
   [...document.querySelectorAll("#unit_table tr")].forEach(e => e.style.backgroundColor = '');
   this.style.backgroundColor = 'pink';
-   $("#lis0").chosen().val(this.id.split(',')[0]);
-   $("#lis0").trigger("chosen:updated");
+   treeselect3.value=this.id.split(',')[0];
+   treeselect3.mount();
    layers[0]=0;
    show_track();
    markerByUnit[this.id.split(',')[0]].openPopup();
@@ -4252,8 +4513,8 @@ function track_Monitoring(evt){
     if(e.cellIndex==0){e.style.backgroundColor = 'transparent';}
    });
    if(evt.target.style.backgroundColor == 'transparent')evt.target.style.backgroundColor = '#1E90FF';
-   $("#lis0").chosen().val(evt.target.parentNode.id);
-   $("#lis0").trigger("chosen:updated");
+   treeselect3.value=evt.target.parentNode.id;
+   treeselect3.mount();
    layers[0]=0;
    show_track();
    let mar=markerByUnit[evt.target.parentNode.id];
@@ -5078,19 +5339,19 @@ if(svdata22)sliv_history=svdata22;
     localStorage.setItem('arhivsliv', JSON.stringify(sliv_history)); 
     slider.value=(Date.parse(data)-Date.parse($('#fromtime1').val()))/(Date.parse($('#fromtime2').val())-Date.parse($('#fromtime1').val()))*2000;
      position(Date.parse(data));
-     $("#lis0").chosen().val(this.id.split(',')[0]);
-     $("#lis0").trigger("chosen:updated");
+     treeselect3.value=this.id.split(',')[0];
+     treeselect3.mount();
      markerByUnit[this.id.split(',')[0]].openPopup();
      
      if ($('#grafik').is(':hidden')) {
       $('#grafik').show();
-      $('#map').css('height', '470px');
-      $('#marrr').css('height', '470px');
-      $('#option').css('height', '470px');
-      $('#unit_info').css('height', '470px');
-      $('#zupinki').css('height', '470px');
-      $('#logistika').css('height', '470px');
-      $('#monitoring').css('height', '470px');
+      $('#map').css('height', 'calc(100vh - 404px)');
+      $('#marrr').css('height', 'calc(100vh - 404px)');
+      $('#option').css('height', 'calc(100vh - 404px)');
+      $('#unit_info').css('height', 'calc(100vh - 404px)');
+      $('#zupinki').css('height', 'calc(100vh - 404px)');
+      $('#logistika').css('height', 'calc(100vh - 404px)');
+      $('#monitoring').css('height', 'calc(100vh - 404px)');
     } 
      show_gr(data,data2);
      //map.setView([parseFloat(this.id.split(',')[1]), parseFloat(this.id.split(',')[2])],map.getZoom(),{animate: false});
@@ -6516,7 +6777,7 @@ $("#unit_table").on("click", function (evt){
     for (let i = 0; i<geozones.length; i++){
     if(name==geozones[i].zone.n){
      let y=((geozones[i]._bounds._northEast.lat+geozones[i]._bounds._southWest.lat)/2).toFixed(5);
-     let x=((geozones[i]._bounds._northEast.lng+geozones[i]._bounds._southWest.lng)/2+0.04).toFixed(5);
+     let x=((geozones[i]._bounds._northEast.lng+geozones[i]._bounds._southWest.lng)/2).toFixed(5);
      map.setView([y,x],map.getZoom(),{animate: false});
           clearGEO();
        let point = geozones[i]._latlngs[0];
@@ -6533,7 +6794,7 @@ $("#unit_table").on("click", function (evt){
            ramka.push(ramka[0]);
          }
          }
-       let polilane = L.polyline(ramka, {color: 'blue'}).addTo(map);
+       let polilane = L.polyline(ramka, {color: '#ff01ffff', weight: 2}).addTo(map);
        geo_layer.push(polilane);
        break;
     }
@@ -6545,8 +6806,8 @@ $("#unit_table").on("click", function (evt){
         let id=unitslist[i].getId();
         let from = row.cells[1].textContent+' 00:00:00';
         let to = row.cells[1].textContent+' 23:59:00';
-        $("#lis0").chosen().val(id);
-        $("#lis0").trigger("chosen:updated");
+        treeselect3.value=id;
+        treeselect3.mount();
         layers[0]=0;
         show_track(from,to);
         break;
@@ -6790,13 +7051,13 @@ $('#geomodul_bt').click(function() {
           if(poly.type == 'Polygon'){
             let coords = L.GeoJSON.coordsToLatLngs(poly.coordinates,1);
             let G=L.polygon(coords, {color: 'blue', stroke: false,  fillOpacity: 0.5}).bindTooltip(n ,{opacity:0.8,sticky:true}).addTo(map);
-            G.nam =m[0]+m[1]+m[4]+m[9];
+            G.nam =m[0]+m[1]+m[4]+m[6];
             garbagepoly.push(G);
           }else{
                 for(let iii = 0; iii<poly.coordinates.length; iii++){
                   let coords = L.GeoJSON.coordsToLatLngs(poly.coordinates[iii],1);
                   let G=L.polygon(coords, {color: 'blue', stroke: false,  fillOpacity: 0.5}).bindTooltip(n ,{opacity:0.8,sticky:true}).addTo(map);
-                  G.nam =m[0]+m[1]+m[4]+m[9];
+                  G.nam =m[0]+m[1]+m[4]+m[6];
                   garbagepoly.push(G);
                 }
           }
@@ -6829,7 +7090,7 @@ $('#prob_bt2').click(function() {
   $('#prob_to').val(new Date(d- tzoffset).toISOString().slice(0, -8));
 });
 $('#prob_bt3').click(function() {
-  let unitId = parseInt($("#lis0").chosen().val());
+  let unitId = treeselect3.value;
   let stop=0;
   let stop_date='';
   let unitName = '';
@@ -7005,13 +7266,13 @@ let str='';
 function dut_ruh(id) {
 if ($('#grafik').is(':hidden')) {
       $('#grafik').show();
-      $('#map').css('height', '470px');
-      $('#marrr').css('height', '470px');
-      $('#option').css('height', '470px');
-      $('#unit_info').css('height', '470px');
-      $('#zupinki').css('height', '470px');
-      $('#logistika').css('height', '470px');
-      $('#monitoring').css('height', '470px');
+      $('#map').css('height', 'calc(100vh - 404px)');
+      $('#marrr').css('height', 'calc(100vh - 404px)');
+      $('#option').css('height', 'calc(100vh - 404px)');
+      $('#unit_info').css('height', 'calc(100vh - 404px)');
+      $('#zupinki').css('height', 'calc(100vh - 404px)');
+      $('#logistika').css('height', 'calc(100vh - 404px)');
+      $('#monitoring').css('height', 'calc(100vh - 404px)');
     } 
 
     var unid =  id;
@@ -7667,7 +7928,7 @@ function jurnal_online(){
           } 
         }
       });
-        $('#men3').css({'background':'pink',  'box-shadow':'0px 0px 5px 5px rgba(255, 1, 1, 0.479)'});
+        $('#men3').css({'background':'pink'});
         audio.play();
       });
     }
@@ -7690,8 +7951,8 @@ if(evt.target.cellIndex==6){
     let name = row.cells[2].textContent;
     for (let i = 0; i<geozones.length; i++){
       if(geozones[i].zone.n == name){
-     let y=((geozones[i]._bounds._northEast.lat+geozones[i]._bounds._southWest.lat)/2).toFixed(5);
-     let x=((geozones[i]._bounds._northEast.lng+geozones[i]._bounds._southWest.lng)/2).toFixed(5);
+       let y=((geozones[i]._bounds._northEast.lat+geozones[i]._bounds._southWest.lat)/2).toFixed(5);
+       let x=((geozones[i]._bounds._northEast.lng+geozones[i]._bounds._southWest.lng)/2).toFixed(5);
        map.setView([y,x],map.getZoom(),{animate: false});
        clearGEO();
        let point = geozones[i]._latlngs[0];
@@ -7714,8 +7975,8 @@ if(evt.target.cellIndex==6){
       let y=unitslist[i].getPosition().y;
       let x=unitslist[i].getPosition().x;
       //map.setView([y,x],map.getZoom(),{animate: false});
-      $("#lis0").chosen().val(id);
-      $("#lis0").trigger("chosen:updated");
+      treeselect3.value=id;
+      treeselect3.mount();
       markerByUnit[id].openPopup();
         break;
      }
@@ -8115,8 +8376,8 @@ $("#log_marh_tb").on("click", function (evt){
 
               clearGarbage(marshrut_treck);
               marshrut_treck=[];
-              $("#lis0").chosen().val(idd);     
-              $("#lis0").trigger("chosen:updated");
+              treeselect3.value=idd;
+              treeselect3.mount();
               layers[0]=0;
               show_track(t0,t2);
               slider.value=(Date.parse(t1)-Date.parse($('#fromtime1').val()))/(Date.parse($('#fromtime2').val())-Date.parse($('#fromtime1').val()))*2000;
@@ -8620,8 +8881,8 @@ if(id_rote>100){id_rote=0;}
               if ($('#log_control_tb').is(':hidden'))return;
               if (t0==0) {t0 = t1}
               if (t2==0) {t2 = t1}
-              $("#lis0").chosen().val(idd);     
-              $("#lis0").trigger("chosen:updated");
+              treeselect3.value=idd;
+              treeselect3.mount();
               layers[0]=0;
               show_track(t0,t2);
               slider.value=(Date.parse(t1)-Date.parse($('#fromtime1').val()))/(Date.parse($('#fromtime2').val())-Date.parse($('#fromtime1').val()))*2000;
@@ -9477,8 +9738,8 @@ let name = evt.target.innerText.split(' ')[0];
       let y=unitslist[i].getPosition().y;
       let x=unitslist[i].getPosition().x;
       //map.setView([y,x],map.getZoom(),{animate: false});
-      $("#lis0").chosen().val(id);
-      $("#lis0").trigger("chosen:updated");
+      treeselect3.value=id;
+      treeselect3.mount();
       markerByUnit[id].openPopup();
       layers[0]=0;
       show_track();
@@ -9792,8 +10053,8 @@ let name = evt.target.innerText.split(' ')[0];
       let y=unitslist[i].getPosition().y;
       let x=unitslist[i].getPosition().x;
       //map.setView([y,x],map.getZoom(),{animate: false});
-      $("#lis0").chosen().val(id);
-      $("#lis0").trigger("chosen:updated");
+      treeselect3.value=id;
+      treeselect3.mount();
       markerByUnit[id].openPopup();
       layers[0]=0;
       show_track();
@@ -10865,8 +11126,8 @@ for(var i=0; i < allunits.length; i++){
   let y=mar.getLatLng().lat;
   let x=mar.getLatLng().lng;
   //map.setView([y,x], map.getZoom(),{animate: false});
-  $("#lis0").chosen().val(id);
-  $("#lis0").trigger("chosen:updated");
+  treeselect3.value=id;
+  treeselect3.mount();
   mar.openPopup();
   layers[0]=0;
   show_track();
@@ -11570,14 +11831,4 @@ function Rote_gruzoperevozki(p1,p2,color,ind){
           }
         });
 }
-
-
-
-
-
-
-
-
-
-
 
