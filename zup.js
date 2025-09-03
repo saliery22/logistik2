@@ -17,6 +17,7 @@ let zvit2=0;
 let zvit3=0;
 let zvit4=0;
 let upd=false;
+let load_list = [];
 //let RES_ID=26227;// 20030 "11_ККЗ"  26227 "KKZ_Gluhiv"
 let RES_ID=601000448;// 601000284   "11_ККЗ"  601000448  "KKZ_Gluhiv"
 let ftp_id = 601000441; //20233
@@ -11831,4 +11832,5 @@ function Rote_gruzoperevozki(p1,p2,color,ind){
           }
         });
 }
+
 
