@@ -16,8 +16,8 @@ let zvit1=0;
 let zvit2=0;
 let zvit3=0;
 let zvit4=0;
-let upd=false;
 let load_list = [];
+let upd=false;
 //let RES_ID=26227;// 20030 "11_ККЗ"  26227 "KKZ_Gluhiv"
 let RES_ID=601000448;// 601000284   "11_ККЗ"  601000448  "KKZ_Gluhiv"
 let ftp_id = 601000441; //20233
@@ -3481,7 +3481,7 @@ function Naryady_start(){
    if(en == '0')en = $('#fromtime2').val();
    slider.value=(Date.parse(st)-Date.parse($('#fromtime1').val()))/(Date.parse($('#fromtime2').val())-Date.parse($('#fromtime1').val()))*2000;
    position(Date.parse(st));
-    treeselect3.value=id;
+    treeselect3.value=parseInt(id);
     treeselect3.mount();
     clear();
     
@@ -4159,7 +4159,7 @@ $("#reestr_save_BT").on("click", function (evt){
 function track_TestNavigation(evt){
   [...document.querySelectorAll("#unit_table tr")].forEach(e => e.style.backgroundColor = '');
   this.style.backgroundColor = 'pink';
-   treeselect3.value=this.id.split(',')[0];
+   treeselect3.value=parseInt(this.id.split(',')[0]);
    treeselect3.mount();
    layers[0]=0;
    show_track();
@@ -4514,7 +4514,7 @@ function track_Monitoring(evt){
     if(e.cellIndex==0){e.style.backgroundColor = 'transparent';}
    });
    if(evt.target.style.backgroundColor == 'transparent')evt.target.style.backgroundColor = '#1E90FF';
-   treeselect3.value=evt.target.parentNode.id;
+   treeselect3.value=parseInt(evt.target.parentNode.id);
    treeselect3.mount();
    layers[0]=0;
    show_track();
@@ -5340,7 +5340,7 @@ if(svdata22)sliv_history=svdata22;
     localStorage.setItem('arhivsliv', JSON.stringify(sliv_history)); 
     slider.value=(Date.parse(data)-Date.parse($('#fromtime1').val()))/(Date.parse($('#fromtime2').val())-Date.parse($('#fromtime1').val()))*2000;
      position(Date.parse(data));
-     treeselect3.value=this.id.split(',')[0];
+     treeselect3.value=parseInt(this.id.split(',')[0]);
      treeselect3.mount();
      markerByUnit[this.id.split(',')[0]].openPopup();
      
@@ -8882,7 +8882,7 @@ if(id_rote>100){id_rote=0;}
               if ($('#log_control_tb').is(':hidden'))return;
               if (t0==0) {t0 = t1}
               if (t2==0) {t2 = t1}
-              treeselect3.value=idd;
+              treeselect3.value=parseInt(idd);
               treeselect3.mount();
               layers[0]=0;
               show_track(t0,t2);
@@ -11832,6 +11832,4 @@ function Rote_gruzoperevozki(p1,p2,color,ind){
           }
         });
 }
-
-
 
