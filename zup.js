@@ -2683,7 +2683,7 @@ if(auto_play==true) {
     }
      if (sec > 2000)sec =2000;
     }
-    if (sec == 700 && auto_play==true && upd==false) {Monitoring2();}
+    if (sec == 700 && $("#monitoring_gif").is(":checked") && upd==false) {Monitoring2();}
     if (sec == 500 && newWindow && newWindow.closed==false && upd==false) {update_popUP();}
     
     if(t>Date.parse($('#fromtime2').val()))t=Date.parse($('#fromtime2').val());
@@ -11832,5 +11832,6 @@ function Rote_gruzoperevozki(p1,p2,color,ind){
           }
         });
 }
+
 
 
