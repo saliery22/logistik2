@@ -58,6 +58,118 @@ $('#track_time2').val(from222);
 
 
 
+function online_ON() {
+  unitslist.forEach(function(unit) {          
+    var unitMarker =  markerByUnit[unit.getId()];
+     if (unitMarker) {
+      var sdsa = unit.getPosition();
+     let pop = unitMarker.getPopup();
+       let fuel = '----';
+           let vodiy ='----';
+           let agregat ='----';
+          let sens = unit.getSensors(); // get unit's sensors
+          for (key in sens) {
+            if (sens[key].n=='Паливо'||sens[key].n=='Топливо') {
+              fuel = unit.calculateSensorValue(unit.getSensor(sens[key].id), unit.getLastMessage());
+              if(fuel == -348201.3876){fuel = "----";} else {fuel = fuel.toFixed();} 
+            }
+          
+            if (sens[key].n=='Водитель'||sens[key].n=='Водій') {
+              vodiy = unit.calculateSensorValue(unit.getSensor(sens[key].id), unit.getLastMessage());
+              if(vodiy == -348201.3876){vodiy = "----";} else {vodiy = vodiy} 
+            }
+          
+            if (sens[key].n=='Прицеп'||sens[key].n=='Причеп') {
+              agregat = unit.calculateSensorValue(unit.getSensor(sens[key].id), unit.getLastMessage());
+              if(agregat == -348201.3876){agregat = "----";} else {agregat = agregat} 
+            }
+          
+          }
+          
+          pop.setContent('<center><font size="1">' + unit.getName()+'<br />' +wialon.util.DateTime.formatTime(sdsa.t)+'<br />' +sdsa.s+' км/год <br />'+sdsa.sc+' супутників <br />'+fuel+'л' +'<br />водій ' +vodiy+'<br />прицеп ' +agregat);
+          if((Date.now())/1000-parseInt(sdsa.t)>3600) pop.setContent('<center><font size="1">' + unit.getName()+'<br /> відсутній GSM звязок <br /> остані дані <br />'+wialon.util.DateTime.formatTime(sdsa.t));
+          if(parseInt(sdsa.sc)<5) pop.setContent('<center><font size="1">' + unit.getName()+'<br /> відсутній GPS звязок');
+    if(sdsa)unitMarker.setLatLng([sdsa.y, sdsa.x]);
+     }
+
+    // listen for new messages
+   let iddl= unit.addListener('changePosition', function(event) {
+      // event is qx.event.type.Data
+      // extract message data
+      var pos = event.getData();
+      // move or create marker, if not exists
+      if (pos) {
+        if (unitMarker) {
+          unitMarker.setLatLng([pos.y, pos.x]);
+         let pop = unitMarker.getPopup();
+        
+           let fuel = '----';
+           let vodiy ='----';
+           let agregat ='----';
+          let sens = unit.getSensors(); // get unit's sensors
+          for (key in sens) {
+            if (sens[key].n=='Паливо'||sens[key].n=='Топливо') {
+              fuel = unit.calculateSensorValue(unit.getSensor(sens[key].id), unit.getLastMessage());
+              if(fuel == -348201.3876){fuel = "----";} else {fuel = fuel.toFixed();} 
+            }
+          
+            if (sens[key].n=='Водитель'||sens[key].n=='Водій') {
+              vodiy = unit.calculateSensorValue(unit.getSensor(sens[key].id), unit.getLastMessage());
+              if(vodiy == -348201.3876){vodiy = "----";} else {vodiy = vodiy} 
+            }
+          
+            if (sens[key].n=='Прицеп'||sens[key].n=='Причеп') {
+              agregat = unit.calculateSensorValue(unit.getSensor(sens[key].id), unit.getLastMessage());
+              if(agregat == -348201.3876){agregat = "----";} else {agregat = agregat} 
+            }
+          
+          }
+          
+          pop.setContent('<center><font size="1">' + unit.getName()+'<br />' +wialon.util.DateTime.formatTime(pos.t)+'<br />' +pos.s+' км/год <br />'+pos.sc+' супутників <br />'+fuel+'л' +'<br />водій ' +vodiy+'<br />прицеп ' +agregat);
+           if((Date.now())/1000-parseInt(pos.t)>3600) pop.setContent('<center><font size="1">' + unit.getName()+'<br /> відсутній GSM звязок <br /> остані дані <br />'+wialon.util.DateTime.formatTime(pos.t));
+          if(parseInt(pos.sc)<5) pop.setContent('<center><font size="1">' + unit.getName()+'<br /> відсутній GPS звязок');
+         
+        }
+      }
+    });
+  });
+}
+
+function online_OFF() {
+  let idl = 1;
+  unitslist.forEach(function(unit) {          
+unit.removeListenerById("changePosition|bubble|"+idl)
+   idl++;
+  });
+}
+
+
+function mark1(e) {
+if($('#zupinki').is(':hidden')) $('#men5').click();
+  treeselect3.value=unitsID[e.relatedTarget._tooltip._content];
+  treeselect3.mount();
+ $('#unit_zup').val(e.relatedTarget._tooltip._content);
+      maska_zup=$('#unit_zup').val();
+      min_zup=$('#min_zup').val();
+      if ($("#alone_zup").is(":checked")) {alone=true;}else{alone=false}
+      Cikle2();
+}
+function mark2(e) {
+  treeselect3.value=unitsID[e.relatedTarget._tooltip._content];
+  treeselect3.mount();
+  if($('#unit_info').is(':hidden')) $('#men4').click();
+  $('.leaflet-container').css('cursor','');
+  $('.zvit').hide();
+  $("#unit_table").empty();
+  $('#zz18').show();
+  clearGEO(); 
+  clearGarbage(garbage);
+  garbage=[];
+  clearGarbage(garbagepoly);
+  garbagepoly=[];
+  clearGarbage(marshrutMarkers);
+  marshrutMarkers=[];
+}
 // Unit markers constructor
 function getUnitMarker(unit) {
   // check for already created marker
@@ -77,7 +189,20 @@ function getUnitMarker(unit) {
     icon: L.icon({
       iconUrl: unit.getIconUrl(imsaze),
       iconAnchor: [imsaze/2, imsaze/2] // set icon center
-    })
+    }),
+     contextmenu: true,
+    contextmenuItems: [{
+        text: 'зупинки',
+        callback: mark1,
+        index: 0
+    },{
+        text: 'пробіг',
+        callback: mark2,
+        index: 1
+    },{
+        separator: true,
+        index: 2
+    }]
   });
   marker.bindPopup('<center><font size="1">' + unit.getName()+'<br />' +wialon.util.DateTime.formatTime(unitPos.t));
   marker.bindTooltip(unit.getName(),{opacity:0.8});
@@ -98,10 +223,12 @@ function getUnitMarker(unit) {
       jurnal(0,unit);
     }
    navigator.clipboard.writeText(unit.getName());        
-   
+   if(online_chek){
+     show_track(from111,(new Date(Date.now() - tzoffset)).toISOString().slice(0, -8));
+   }else{
      show_track();
      show_gr();
-
+   }
   });
 
   // save marker for access from filtering by distance
@@ -133,7 +260,7 @@ function init() { // Execute after login succeed
    console.log(lng)
 
   // specify what kind of data should be returned
-  var flags = wialon.item.Item.dataFlag.base | wialon.item.Unit.dataFlag.lastPosition;
+  var flags = wialon.item.Item.dataFlag.base | wialon.item.Unit.dataFlag.lastPosition | wialon.item.Unit.dataFlag.sensors | wialon.item.Unit.dataFlag.lastMessage;
   var res_flags = wialon.item.Item.dataFlag.base | wialon.item.Resource.dataFlag.reports | wialon.item.Resource.dataFlag.zones | wialon.item.Resource.dataFlag.zoneGroups | wialon.item.Resource.dataFlag.trailers | wialon.item.Resource.dataFlag.drivers;
  
 	var remote= wialon.core.Remote.getInstance();
@@ -144,6 +271,7 @@ function init() { // Execute after login succeed
   session.loadLibrary("resourceZoneGroups"); // load Reports Library
   session.loadLibrary("resourceDrivers");
   session.loadLibrary("resourceTrailers"); 
+  session.loadLibrary("unitSensors");
   
  
 
@@ -607,7 +735,7 @@ serch_list_avto.push({ "value": name, "name": name+" ("+grup_id.length+")", "chi
 
 
   
-         if (name=='John Deere' || name=='Обскувачі'|| name=='Навантажувачі'|| name=='Трактори'|| name=='Спецтехніка'){
+         if (name=='John Deere' || name=='Обприскувачі'|| name=='Навантажувачі'|| name=='Трактори'|| name=='Спецтехніка'){
           $('#m_lis').append($('<option selected>').text(name+" ("+data.items[i].$$user_units.length+")").val(name));
           $('#track_lis2').append($('<option selected>').text(name+" ("+data.items[i].$$user_units.length+")").val(name));
          }else{
@@ -1629,7 +1757,8 @@ L.easyButton('<img src="route.png" title="очистити мапу від тр�
             icon:      '<img src="omline.png">',               // and define its properties
             title:     'ввімкнути онлайн стеження',      // like its title
             onClick: function(btn, map) {       // and its callback
-                map.setView([51.6760,33.9195],12);
+             online_chek=true;
+              online_ON();
                 $('#niz').hide();
                 $('#map').css('height', 'calc(100vh - 34px)');
                 btn.state('zoom-to-school');    // change state on click!
@@ -1639,7 +1768,8 @@ L.easyButton('<img src="route.png" title="очистити мапу від тр�
             icon:      '<img src="ofline.png">',
             title:     'вимкнути онлайн стеження',
             onClick: function(btn, map) {
-                map.setView([51.5507,33.3493],12);
+              online_chek=false;
+              online_OFF();
                 $('#niz').show();
                 $('#map').css('height', 'calc(100vh - 124px)');
                 btn.state('zoom-to-forest');
@@ -2665,9 +2795,11 @@ function position(t)  {
 var tik =0;
 var sec =700;
 var sec2=400;
+var online_chek =false;
 setInterval(function() {
   sec2--;
   if (sec2 <= 0 ) {jurnal_online();sec2=2000;}
+if(online_chek==false) {
 if(auto_play==true) {
   //msg(sec/10);
     let t=Date.parse($('#f').text())+parseInt(slider_sp.value);
@@ -2690,6 +2822,7 @@ if(auto_play==true) {
     slider.value=(t-Date.parse($('#fromtime1').val()))/(Date.parse($('#fromtime2').val())-Date.parse($('#fromtime1').val()))*2000;
     position(t);
   }
+}
   if(kn==2){
     let t=Date.parse($('#f').text())-3000;
     if(t<Date.parse($('#fromtime1').val()))t=Date.parse($('#fromtime1').val());
@@ -10718,8 +10851,8 @@ async function logistik_zvit(data){
      for (let j = 0; j<tb.rows[0].cells.length; j+=3){
       if(tb.rows[0].cells[j].textContent=='')continue;
       mar_text+=' - '+tb.rows[1].cells[j].children[0].children[0].textContent;
-      if(tb.rows[1].cells[j].children[0].children[0].textContent=="СТОЯНКА" && j>0 && j<tb.rows[0].cells.length-3)home_stops+=parseInt(tb.rows[2].cells[j+1].textContent.split(',')[1]);
-      if(tb.rows[1].cells[j].children[0].children[0].textContent=="некоректна" && j>0 && j<tb.rows[0].cells.length-3)err_stops+=parseInt(tb.rows[2].cells[j+1].textContent.split(',')[1]);
+      if(tb.rows[1].cells[j].children[0].children[0].textContent=="СТОЯНКА" && j>0 && tb.rows[4].cells[j].getElementsByTagName('input')[0].checked==true && j<tb.rows[0].cells.length-3)home_stops+=parseInt(tb.rows[2].cells[j+1].textContent.split(',')[1]);
+      if(tb.rows[1].cells[j].children[0].children[0].textContent=="некоректна" && j>0 && tb.rows[4].cells[j].getElementsByTagName('input')[0].checked==true && j>0 && j<tb.rows[0].cells.length-3)err_stops+=parseInt(tb.rows[2].cells[j+1].textContent.split(',')[1]);
       if(c1==-1){
          c1=j;
          from =  Date.parse(tb.rows[2].cells[c1+2].textContent);
@@ -10754,14 +10887,18 @@ async function logistik_zvit(data){
              let xx = parseFloat(data[0][i][0].split(',')[1]);
              let dis = wialon.util.Geometry.getDistance(y, x, yy, xx);
             
+             if(dis<100000){
              probeg+=dis;
              probeg3+=dis;
-       
-             marshrut_data.push([y,x],[yy,xx]);
-          }
-          let l = L.polyline([marshrut_data], {color: 'rgb(228, 12, 12)',weight:2,opacity:1}).addTo(map);
+             let l = L.polyline([[y,x],[yy,xx]], {color: 'rgb(228, 12, 12)',weight:2,opacity:1}).addTo(map);
           marshrut_treck.push(l);
-          marshrut_data=[];
+             }else{
+              let l = L.polyline([[y,x],[yy,xx]], {color: 'rgba(222, 0, 252, 1)',weight:2,opacity:1}).addTo(map);
+          marshrut_treck.push(l);
+             }
+             
+          }
+
 
           
           if (tb.rows[4].cells[c1].getElementsByTagName('input')[0].checked==true) {p1=tb.rows[2].cells[c1].textContent;}else{stops+=parseInt(tb.rows[2].cells[c1+1].textContent.split(',')[1]);}
@@ -10807,15 +10944,17 @@ async function logistik_zvit(data){
              let xx = parseFloat(data[0][i][0].split(',')[1]);
              let dis = wialon.util.Geometry.getDistance(y, x, yy, xx);
              
+              if(dis<100000){
              probeg+=dis;
              probeg1+=dis;
-
-             marshrut_data.push([y,x],[yy,xx]);
+             let l = L.polyline([[y,x],[yy,xx]], {color: 'rgb(70, 247, 0)',weight:4,opacity:1}).addTo(map);
+             l.bringToBack();
+             marshrut_treck.push(l);
+              }else{
+                let l = L.polyline([[y,x],[yy,xx]], {color:  'rgba(222, 0, 252, 1)',weight:2,opacity:1}).addTo(map);
+                marshrut_treck.push(l);
+              }
           }
-          let l = L.polyline([marshrut_data], {color: 'rgb(70, 247, 0)',weight:4,opacity:1}).addTo(map);
-          l.bringToBack();
-          marshrut_treck.push(l);
-          marshrut_data=[];
         }
         c1=c2;
         from =  to;
@@ -11832,5 +11971,4 @@ function Rote_gruzoperevozki(p1,p2,color,ind){
           }
         });
 }
-
 
