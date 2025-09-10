@@ -57,7 +57,7 @@ $('#track_time2').val(from222);
 
 
 
-
+let online_mark = {};
 function online_ON() {
   unitslist.forEach(function(unit) {          
     var unitMarker =  markerByUnit[unit.getId()];
@@ -90,6 +90,18 @@ function online_ON() {
           if((Date.now())/1000-parseInt(sdsa.t)>3600) pop.setContent('<center><font size="1">' + unit.getName()+'<br /> відсутній GSM звязок <br /> остані дані <br />'+wialon.util.DateTime.formatTime(sdsa.t));
           if(parseInt(sdsa.sc)<5) pop.setContent('<center><font size="1">' + unit.getName()+'<br /> відсутній GPS звязок');
     if(sdsa)unitMarker.setLatLng([sdsa.y, sdsa.x]);
+
+    if((Date.now())/1000-parseInt(sdsa.t)>3600 || parseInt(sdsa.sc)<5){
+            let markerstarton = L.marker([sdsa.y, sdsa.x],{icon: L.icon({iconUrl: "stop.png",iconSize:[18,18],iconAnchor:[9, 9]}),zIndexOffset:-1000}).addTo(map);
+            online_mark[unit.getName()] = markerstarton;
+            }else{
+            if(parseInt(sdsa.s)>0){
+            let markerstarton = L.marker([sdsa.y, sdsa.x],{icon: L.icon({iconUrl: "move.png",iconSize:[50,50],iconAnchor:[25, 25]}),zIndexOffset:-1000}).addTo(map);
+             markerstarton.setRotationAngle(parseInt(sdsa.c)-90);
+            online_mark[unit.getName()] = markerstarton;
+            }
+            }
+
      }
 
     // listen for new messages
@@ -102,6 +114,7 @@ function online_ON() {
         if (unitMarker) {
           unitMarker.setLatLng([pos.y, pos.x]);
          let pop = unitMarker.getPopup();
+        
         
            let fuel = '----';
            let vodiy ='----';
@@ -125,9 +138,27 @@ function online_ON() {
           
           }
           
+
+           if(online_mark[unit.getName()]) map.removeLayer(online_mark[unit.getName()]);
+            if((Date.now())/1000-parseInt(pos.t)>3600 || parseInt(pos.sc)<5){
+            let markerstarton = L.marker([pos.y, pos.x],{icon: L.icon({iconUrl: "stop.png",iconSize:[18,18],iconAnchor:[9, 9]}),zIndexOffset:-1000}).addTo(map);
+            online_mark[unit.getName()] = markerstarton;
+            }else{
+            if(parseInt(pos.s)>0){
+            let markerstarton = L.marker([pos.y, pos.x],{icon: L.icon({iconUrl: "move.png",iconSize:[50,50],iconAnchor:[25, 25]}),zIndexOffset:-1000}).addTo(map);
+             markerstarton.setRotationAngle(parseInt(pos.c)-90);
+            online_mark[unit.getName()] = markerstarton;
+            }
+            }
+          
+
           pop.setContent('<center><font size="1">' + unit.getName()+'<br />' +wialon.util.DateTime.formatTime(pos.t)+'<br />' +pos.s+' км/год <br />'+pos.sc+' супутників <br />'+fuel+'л' +'<br />водій ' +vodiy+'<br />прицеп ' +agregat);
-           if((Date.now())/1000-parseInt(pos.t)>3600) pop.setContent('<center><font size="1">' + unit.getName()+'<br /> відсутній GSM звязок <br /> остані дані <br />'+wialon.util.DateTime.formatTime(pos.t));
-          if(parseInt(pos.sc)<5) pop.setContent('<center><font size="1">' + unit.getName()+'<br /> відсутній GPS звязок');
+           if((Date.now())/1000-parseInt(pos.t)>3600){
+            pop.setContent('<center><font size="1">' + unit.getName()+'<br /> відсутній GSM звязок <br /> остані дані <br />'+wialon.util.DateTime.formatTime(pos.t));
+           } 
+          if(parseInt(pos.sc)<5){
+            pop.setContent('<center><font size="1">' + unit.getName()+'<br /> відсутній GPS звязок');
+          } 
          
         }
       }
@@ -141,6 +172,7 @@ function online_OFF() {
 unit.removeListenerById("changePosition|bubble|"+idl)
    idl++;
   });
+  for (const key in online_mark) {  map.removeLayer(online_mark[key])}
 }
 
 
@@ -1529,14 +1561,43 @@ $("#men8").on("click", function (){
       Cikle2();
     });
 
-    
-    
-   
+ 
     
 }
 
+let rote_map_x1=0;
+let rote_map_y1=0;
+function Rote_map1(e){
+  rote_map_x1=e.latlng.lat;
+  rote_map_y1=e.latlng.lng;
+}
+function Rote_map2(e){
+if(rote_map_x1==0)return;
 
-
+    let ax = rote_map_x1;
+    let ay = rote_map_y1;
+    let bx = e.latlng.lat;
+    let by = e.latlng.lng;
+  
+        wialon.util.Gis.getRoute(ax,ay,bx,by,0, function(error, data) {
+          if (error) { // error was happened
+            msg(wialon.core.Errors.getErrorText(error));
+            return;
+          }
+          if (data.status=="OK"){
+            let line=[];
+            for (v = 0; v < data.points.length; v+=2) {
+            line.push ([data.points[v].lat,data.points[v].lon]);
+            } 
+            let d= (data.distance.value/1000).toFixed();
+            let t= (data.duration.value/60).toFixed();
+            let l = L.polyline([line], {weight: 8,opacity:0.5,color: '#002fffff'}).bindTooltip(''+d+' км<br />'+t+' хвилин',{opacity:0.8, sticky: true}).addTo(map);
+            zup_mark_data.push(l);
+           
+           
+          }
+        });
+}
 
 
 var layerControl=0;
@@ -1557,6 +1618,14 @@ function initMap() {
        }, {
          text: 'Очистити маркери',
          callback: clear2
+       },{
+        separator: true
+       },{
+         text: 'початок маршруту',
+         callback: Rote_map1
+       },{
+         text: 'кінець маршруту',
+         callback: Rote_map2
        }]
     //zoomDelta: 0.1,
     //zoomSnap: 0,
@@ -1785,7 +1854,7 @@ L.easyButton('<img src="route.png" title="очистити мапу від тр�
 $(document).ready(function () {
   // init session
   //wialon.core.Session.getInstance().initSession("https://local3.ingps.com.ua",null,0x800);
-  wialon.core.Session.getInstance().initSession("https://hst-api.wialon.com",null,0x800);
+  wialon.core.Session.getInstance().initSession("https://hst-api.wialon.eu",null,0x800);
 
   wialon.core.Session.getInstance().loginToken(TOKEN, "", // try to login
     function (code) { // login callback
@@ -2799,7 +2868,7 @@ var online_chek =false;
 setInterval(function() {
   sec2--;
   if (sec2 <= 0 ) {jurnal_online();sec2=2000;}
-if(online_chek==false) {
+
 if(auto_play==true) {
   //msg(sec/10);
     let t=Date.parse($('#f').text())+parseInt(slider_sp.value);
@@ -2815,14 +2884,16 @@ if(auto_play==true) {
     }
      if (sec > 2000)sec =2000;
     }
+    if(online_chek==false) {
     if (sec == 700 && $("#monitoring_gif").is(":checked") && upd==false) {Monitoring2();}
     if (sec == 500 && newWindow && newWindow.closed==false && upd==false) {update_popUP();}
     
     if(t>Date.parse($('#fromtime2').val()))t=Date.parse($('#fromtime2').val());
     slider.value=(t-Date.parse($('#fromtime1').val()))/(Date.parse($('#fromtime2').val())-Date.parse($('#fromtime1').val()))*2000;
     position(t);
+    }
   }
-}
+
   if(kn==2){
     let t=Date.parse($('#f').text())-3000;
     if(t<Date.parse($('#fromtime1').val()))t=Date.parse($('#fromtime1').val());
