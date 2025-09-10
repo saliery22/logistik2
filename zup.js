@@ -105,6 +105,7 @@ unitslist.forEach(function(unit) {
   });    
 }
 let online_mark = {};
+let event_data = {};
 function online_ON() {
   online_upd();
   unitslist.forEach(function(unit) {          
@@ -170,13 +171,15 @@ function online_ON() {
       }
       }
     });
+console.log(iddl)
+event_data[unit.getId()]=iddl;
   });
 }
 
 function online_OFF() {
   let idl = 1;
   unitslist.forEach(function(unit) {          
-unit.removeListenerById("changePosition|bubble|"+idl)
+console.log(unit.removeListenerById(event_data[unit.getId()]))
    idl++;
   });
   for (const key in online_mark) {  map.removeLayer(online_mark[key])}
