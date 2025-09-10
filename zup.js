@@ -56,12 +56,11 @@ $('#track_time1').val(from111);
 $('#track_time2').val(from222);
 
 
-
-let online_mark = {};
-function online_ON() {
-  unitslist.forEach(function(unit) {          
+function online_upd() {
+unitslist.forEach(function(unit) {          
     var unitMarker =  markerByUnit[unit.getId()];
      if (unitMarker) {
+      if(unitMarker.options.opacity>0){
       var sdsa = unit.getPosition();
      let pop = unitMarker.getPopup();
        let fuel = '----';
@@ -93,25 +92,32 @@ function online_ON() {
 
     if((Date.now())/1000-parseInt(sdsa.t)>3600 || parseInt(sdsa.sc)<5){
             let markerstarton = L.marker([sdsa.y, sdsa.x],{icon: L.icon({iconUrl: "stop.png",iconSize:[18,18],iconAnchor:[9, 9]}),zIndexOffset:-1000}).addTo(map);
-            online_mark[unit.getName()] = markerstarton;
+            online_mark[unit.getId()] = markerstarton;
             }else{
             if(parseInt(sdsa.s)>0){
             let markerstarton = L.marker([sdsa.y, sdsa.x],{icon: L.icon({iconUrl: "move.png",iconSize:[50,50],iconAnchor:[25, 25]}),zIndexOffset:-1000}).addTo(map);
              markerstarton.setRotationAngle(parseInt(sdsa.c)-90);
-            online_mark[unit.getName()] = markerstarton;
+            online_mark[unit.getId()] = markerstarton;
             }
             }
-
+          }
      }
-
+  });    
+}
+let online_mark = {};
+function online_ON() {
+  online_upd();
+  unitslist.forEach(function(unit) {          
     // listen for new messages
    let iddl= unit.addListener('changePosition', function(event) {
       // event is qx.event.type.Data
       // extract message data
       var pos = event.getData();
       // move or create marker, if not exists
+       var unitMarker =  markerByUnit[unit.getId()];
       if (pos) {
         if (unitMarker) {
+          if(unitMarker.options.opacity>0){
           unitMarker.setLatLng([pos.y, pos.x]);
          let pop = unitMarker.getPopup();
         
@@ -139,15 +145,15 @@ function online_ON() {
           }
           
 
-           if(online_mark[unit.getName()]) map.removeLayer(online_mark[unit.getName()]);
+           if(online_mark[unit.getId()]) map.removeLayer(online_mark[unit.getId()]);
             if((Date.now())/1000-parseInt(pos.t)>3600 || parseInt(pos.sc)<5){
             let markerstarton = L.marker([pos.y, pos.x],{icon: L.icon({iconUrl: "stop.png",iconSize:[18,18],iconAnchor:[9, 9]}),zIndexOffset:-1000}).addTo(map);
-            online_mark[unit.getName()] = markerstarton;
+            online_mark[unit.getId()] = markerstarton;
             }else{
             if(parseInt(pos.s)>0){
             let markerstarton = L.marker([pos.y, pos.x],{icon: L.icon({iconUrl: "move.png",iconSize:[50,50],iconAnchor:[25, 25]}),zIndexOffset:-1000}).addTo(map);
              markerstarton.setRotationAngle(parseInt(pos.c)-90);
-            online_mark[unit.getName()] = markerstarton;
+            online_mark[unit.getId()] = markerstarton;
             }
             }
           
@@ -161,6 +167,7 @@ function online_ON() {
           } 
          
         }
+      }
       }
     });
   });
@@ -924,7 +931,7 @@ const treeselect2 = new Treeselect({
         let id = parseInt(spisok[ii].split('|||')[2]);
        filtr_data.push(id);
        let mm = markerByUnit[id];
-        if(mm  && rux==0)mm.setOpacity(1);
+        if(mm  && rux==0)mm.setOpacity(1);  
       }
       if(vkl){
         for(var i=0; i < allunits.length; i++){
@@ -941,7 +948,10 @@ const treeselect2 = new Treeselect({
  
     }
     filtr=true;
-
+  if(online_chek==true){
+        for (const key in online_mark) {  map.removeLayer(online_mark[key])}
+        online_upd();
+        }
  })
    
 
