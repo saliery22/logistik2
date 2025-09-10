@@ -195,16 +195,13 @@ function online_ON() {
       }
       }
     });
-console.log(iddl)
 event_data[unit.getId()]=iddl;
   });
 }
 
 function online_OFF() {
-  let idl = 1;
   unitslist.forEach(function(unit) {          
-console.log(unit.removeListenerById(event_data[unit.getId()]))
-   idl++;
+unit.removeListenerById(event_data[unit.getId()]);
   });
   for (const key in online_mark) {  map.removeLayer(online_mark[key])}
 }
