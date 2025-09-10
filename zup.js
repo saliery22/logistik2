@@ -91,8 +91,20 @@ unitslist.forEach(function(unit) {
     if(sdsa)unitMarker.setLatLng([sdsa.y, sdsa.x]);
 
     if((Date.now())/1000-parseInt(sdsa.t)>3600 || parseInt(sdsa.sc)<5){
-            let markerstarton = L.marker([sdsa.y, sdsa.x],{icon: L.icon({iconUrl: "stop.png",iconSize:[18,18],iconAnchor:[9, 9]}),zIndexOffset:-1000}).addTo(map);
-            online_mark[unit.getId()] = markerstarton;
+                         if((Date.now())/1000-parseInt(sdsa.t)>21600){
+                          let markerstarton = L.marker([sdsa.y, sdsa.x],{icon: L.icon({iconUrl: "stop.png",iconSize:[18,18],iconAnchor:[9, 9]}),zIndexOffset:-1000}).addTo(map);
+                          online_mark[unit.getId()] = markerstarton;
+                         }else{
+                           if(parseInt(sdsa.sc)<5){
+                           let markerstarton = L.marker([sdsa.y, sdsa.x],{icon: L.icon({iconUrl: "stop3.png",iconSize:[18,18],iconAnchor:[9, 9]}),zIndexOffset:-1000}).addTo(map);
+                           online_mark[unit.getId()] = markerstarton;
+                           }else{
+                             if((Date.now())/1000-parseInt(sdsa.t)>3600){
+                             let markerstarton = L.marker([sdsa.y, sdsa.x],{icon: L.icon({iconUrl: "stop2.png",iconSize:[18,18],iconAnchor:[9, 9]}),zIndexOffset:-1000}).addTo(map);
+                             online_mark[unit.getId()] = markerstarton;
+                             }
+                         }
+                         }
             }else{
             if(parseInt(sdsa.s)>0){
             let markerstarton = L.marker([sdsa.y, sdsa.x],{icon: L.icon({iconUrl: "move.png",iconSize:[50,50],iconAnchor:[25, 25]}),zIndexOffset:-1000}).addTo(map);
@@ -148,8 +160,20 @@ function online_ON() {
 
            if(online_mark[unit.getId()]) map.removeLayer(online_mark[unit.getId()]);
             if((Date.now())/1000-parseInt(pos.t)>3600 || parseInt(pos.sc)<5){
-            let markerstarton = L.marker([pos.y, pos.x],{icon: L.icon({iconUrl: "stop.png",iconSize:[18,18],iconAnchor:[9, 9]}),zIndexOffset:-1000}).addTo(map);
-            online_mark[unit.getId()] = markerstarton;
+                         if((Date.now())/1000-parseInt(pos.t)>21600){
+                          let markerstarton = L.marker([pos.y, pos.x],{icon: L.icon({iconUrl: "stop.png",iconSize:[18,18],iconAnchor:[9, 9]}),zIndexOffset:-1000}).addTo(map);
+                          online_mark[unit.getId()] = markerstarton;
+                         }else{
+                           if(parseInt(pos.sc)<5){
+                           let markerstarton = L.marker([pos.y, pos.x],{icon: L.icon({iconUrl: "stop3.png",iconSize:[18,18],iconAnchor:[9, 9]}),zIndexOffset:-1000}).addTo(map);
+                           online_mark[unit.getId()] = markerstarton;
+                           }else{
+                             if((Date.now())/1000-parseInt(pos.t)>3600){
+                             let markerstarton = L.marker([pos.y, pos.x],{icon: L.icon({iconUrl: "stop2.png",iconSize:[18,18],iconAnchor:[9, 9]}),zIndexOffset:-1000}).addTo(map);
+                             online_mark[unit.getId()] = markerstarton;
+                             }
+                         }
+                         }
             }else{
             if(parseInt(pos.s)>0){
             let markerstarton = L.marker([pos.y, pos.x],{icon: L.icon({iconUrl: "move.png",iconSize:[50,50],iconAnchor:[25, 25]}),zIndexOffset:-1000}).addTo(map);
