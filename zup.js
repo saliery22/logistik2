@@ -931,6 +931,7 @@ const treeselect2 = new Treeselect({
         let id = parseInt(spisok[ii].split('|||')[2]);
        filtr_data.push(id);
        let mm = markerByUnit[id];
+       mm.setZIndexOffset(1000);
         if(mm  && rux==0)mm.setOpacity(1);  
       }
       if(vkl){
