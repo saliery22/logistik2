@@ -61,6 +61,7 @@ unitslist.forEach(function(unit) {
     var unitMarker =  markerByUnit[unit.getId()];
      if (unitMarker) {
       if(unitMarker.options.opacity>0){
+        unitMarker.setOpacity(1);
       var sdsa = unit.getPosition();
      let pop = unitMarker.getPopup();
        let fuel = '----';
@@ -86,21 +87,24 @@ unitslist.forEach(function(unit) {
           }
           
           pop.setContent('<center><font size="1">' + unit.getName()+'<br />' +wialon.util.DateTime.formatTime(sdsa.t)+'<br />' +sdsa.s+' км/год <br />'+sdsa.sc+' супутників <br />'+fuel+'л' +'<br />водій ' +vodiy+'<br />прицеп ' +agregat);
-          if((Date.now())/1000-parseInt(sdsa.t)>3600) pop.setContent('<center><font size="1">' + unit.getName()+'<br /> відсутній GSM звязок <br /> остані дані <br />'+wialon.util.DateTime.formatTime(sdsa.t));
-          if(parseInt(sdsa.sc)<5) pop.setContent('<center><font size="1">' + unit.getName()+'<br /> відсутній GPS звязок');
+          if((Date.now())/1000-parseInt(sdsa.t)>3600 || parseInt(sdsa.sc)<5){
+            pop.setContent('<center><font size="1">' + unit.getName()+'<br /> ВІДСУТНЯ НАВІГАЦІЯ <br /> остані дані <br />'+wialon.util.DateTime.formatTime(sdsa.t)+'<br />'+sdsa.sc+' супутників <br />');
+            unitMarker.setOpacity(0.6);
+          } 
+         
     if(sdsa)unitMarker.setLatLng([sdsa.y, sdsa.x]);
 
     if((Date.now())/1000-parseInt(sdsa.t)>3600 || parseInt(sdsa.sc)<5){
                          if((Date.now())/1000-parseInt(sdsa.t)>21600){
-                          let markerstarton = L.marker([sdsa.y, sdsa.x],{icon: L.icon({iconUrl: "stop.png",iconSize:[18,18],iconAnchor:[9, 9]}),zIndexOffset:-1000}).addTo(map);
+                          let markerstarton = L.marker([sdsa.y, sdsa.x],{icon: L.icon({iconUrl: "stop.png",iconSize:[16,16],iconAnchor:[8, 8]}),zIndexOffset:-1000}).addTo(map);
                           online_mark[unit.getId()] = markerstarton;
                          }else{
                            if(parseInt(sdsa.sc)<5){
-                           let markerstarton = L.marker([sdsa.y, sdsa.x],{icon: L.icon({iconUrl: "stop3.png",iconSize:[18,18],iconAnchor:[9, 9]}),zIndexOffset:-1000}).addTo(map);
+                           let markerstarton = L.marker([sdsa.y, sdsa.x],{icon: L.icon({iconUrl: "stop3.png",iconSize:[16,16],iconAnchor:[8, 8]}),zIndexOffset:-1000}).addTo(map);
                            online_mark[unit.getId()] = markerstarton;
                            }else{
                              if((Date.now())/1000-parseInt(sdsa.t)>3600){
-                             let markerstarton = L.marker([sdsa.y, sdsa.x],{icon: L.icon({iconUrl: "stop2.png",iconSize:[18,18],iconAnchor:[9, 9]}),zIndexOffset:-1000}).addTo(map);
+                             let markerstarton = L.marker([sdsa.y, sdsa.x],{icon: L.icon({iconUrl: "stop2.png",iconSize:[16,16],iconAnchor:[8, 8]}),zIndexOffset:-1000}).addTo(map);
                              online_mark[unit.getId()] = markerstarton;
                              }
                          }
@@ -131,6 +135,7 @@ function online_ON() {
       if (pos) {
         if (unitMarker) {
           if(unitMarker.options.opacity>0){
+             unitMarker.setOpacity(1);
           unitMarker.setLatLng([pos.y, pos.x]);
          let pop = unitMarker.getPopup();
         
@@ -161,15 +166,15 @@ function online_ON() {
            if(online_mark[unit.getId()]) map.removeLayer(online_mark[unit.getId()]);
             if((Date.now())/1000-parseInt(pos.t)>3600 || parseInt(pos.sc)<5){
                          if((Date.now())/1000-parseInt(pos.t)>21600){
-                          let markerstarton = L.marker([pos.y, pos.x],{icon: L.icon({iconUrl: "stop.png",iconSize:[18,18],iconAnchor:[9, 9]}),zIndexOffset:-1000}).addTo(map);
+                          let markerstarton = L.marker([pos.y, pos.x],{icon: L.icon({iconUrl: "stop.png",iconSize:[16,16],iconAnchor:[8, 8]}),zIndexOffset:-1000}).addTo(map);
                           online_mark[unit.getId()] = markerstarton;
                          }else{
                            if(parseInt(pos.sc)<5){
-                           let markerstarton = L.marker([pos.y, pos.x],{icon: L.icon({iconUrl: "stop3.png",iconSize:[18,18],iconAnchor:[9, 9]}),zIndexOffset:-1000}).addTo(map);
+                           let markerstarton = L.marker([pos.y, pos.x],{icon: L.icon({iconUrl: "stop3.png",iconSize:[16,16],iconAnchor:[8, 8]}),zIndexOffset:-1000}).addTo(map);
                            online_mark[unit.getId()] = markerstarton;
                            }else{
                              if((Date.now())/1000-parseInt(pos.t)>3600){
-                             let markerstarton = L.marker([pos.y, pos.x],{icon: L.icon({iconUrl: "stop2.png",iconSize:[18,18],iconAnchor:[9, 9]}),zIndexOffset:-1000}).addTo(map);
+                             let markerstarton = L.marker([pos.y, pos.x],{icon: L.icon({iconUrl: "stop2.png",iconSize:[16,16],iconAnchor:[8, 8]}),zIndexOffset:-1000}).addTo(map);
                              online_mark[unit.getId()] = markerstarton;
                              }
                          }
@@ -184,12 +189,10 @@ function online_ON() {
           
 
           pop.setContent('<center><font size="1">' + unit.getName()+'<br />' +wialon.util.DateTime.formatTime(pos.t)+'<br />' +pos.s+' км/год <br />'+pos.sc+' супутників <br />'+fuel+'л' +'<br />водій ' +vodiy+'<br />прицеп ' +agregat);
-           if((Date.now())/1000-parseInt(pos.t)>3600){
-            pop.setContent('<center><font size="1">' + unit.getName()+'<br /> відсутній GSM звязок <br /> остані дані <br />'+wialon.util.DateTime.formatTime(pos.t));
+           if((Date.now())/1000-parseInt(pos.t)>3600 || parseInt(pos.sc)<5){
+            pop.setContent('<center><font size="1">' + unit.getName()+'<br /> ВІДСУТНЯ НАВІГАЦІЯ <br /> остані дані <br />'+wialon.util.DateTime.formatTime(pos.t)+'<br />'+pos.sc+' супутників <br />');
+            unitMarker.setOpacity(0.6);
            } 
-          if(parseInt(pos.sc)<5){
-            pop.setContent('<center><font size="1">' + unit.getName()+'<br /> відсутній GPS звязок');
-          } 
          
         }
       }
