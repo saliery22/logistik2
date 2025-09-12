@@ -4,7 +4,7 @@ var TOKEN = '4d2e59443e9e64c89c5725f14c042fbd901A55F9167060545B703A13ABC2EB47E8B
 
 
 // global variables
-var map, marker,unitslist = [],unitslistID = [],allunits = [],rest_units = [],marshruts = [],zup = [], unitMarkers = [], markerByUnit = {},tile_layer, layers = {},marshrutMarkers = [],unitsID = {},Vibranaya_zona,temp_layer=[],trailers={},drivers={};
+var map, marker,unitslist = [],unitslistID = [],allunits = [],rest_units = [],marshruts = [],zup = [], unitMarkers = [], markerByUnit = {},tile_layer, layers = {},marshrutMarkers = [],unitsID = {},Vibranaya_zona,temp_layer=[],trailers={},drivers={},trailersID=[],driversID=[];
 var areUnitsLoaded = false;
 var marshrutID=99;
 var cklikkk=0;
@@ -69,19 +69,19 @@ unitslist.forEach(function(unit) {
            let agregat ='----';
           let sens = unit.getSensors(); // get unit's sensors
           for (key in sens) {
-            if (sens[key].n=='Паливо'||sens[key].n=='Топливо') {
+            if (sens[key].t=='fuel level') {
               fuel = unit.calculateSensorValue(unit.getSensor(sens[key].id), unit.getLastMessage());
               if(fuel == -348201.3876){fuel = "----";} else {fuel = fuel.toFixed();} 
             }
           
-            if (sens[key].n=='Водитель'||sens[key].n=='Водій') {
+            if (sens[key].t=='driver') {
               vodiy = unit.calculateSensorValue(unit.getSensor(sens[key].id), unit.getLastMessage());
-              if(vodiy == -348201.3876){vodiy = "----";} else {vodiy = vodiy} 
+              if(vodiy == -348201.3876){vodiy = "----";}
             }
           
-            if (sens[key].n=='Прицеп'||sens[key].n=='Причеп') {
+            if (sens[key].t=='trailer') {
               agregat = unit.calculateSensorValue(unit.getSensor(sens[key].id), unit.getLastMessage());
-              if(agregat == -348201.3876){agregat = "----";} else {agregat = agregat} 
+              if(agregat == -348201.3876){agregat = "----";}
             }
           
           }
@@ -144,20 +144,20 @@ function online_ON() {
            let vodiy ='----';
            let agregat ='----';
           let sens = unit.getSensors(); // get unit's sensors
-          for (key in sens) {
-            if (sens[key].n=='Паливо'||sens[key].n=='Топливо') {
+                 for (key in sens) {
+            if (sens[key].t=='fuel level') {
               fuel = unit.calculateSensorValue(unit.getSensor(sens[key].id), unit.getLastMessage());
               if(fuel == -348201.3876){fuel = "----";} else {fuel = fuel.toFixed();} 
             }
           
-            if (sens[key].n=='Водитель'||sens[key].n=='Водій') {
+            if (sens[key].t=='driver') {
               vodiy = unit.calculateSensorValue(unit.getSensor(sens[key].id), unit.getLastMessage());
-              if(vodiy == -348201.3876){vodiy = "----";} else {vodiy = vodiy} 
+              if(vodiy == -348201.3876){vodiy = "----";}
             }
           
-            if (sens[key].n=='Прицеп'||sens[key].n=='Причеп') {
+            if (sens[key].t=='trailer') {
               agregat = unit.calculateSensorValue(unit.getSensor(sens[key].id), unit.getLastMessage());
-              if(agregat == -348201.3876){agregat = "----";} else {agregat = agregat} 
+              if(agregat == -348201.3876){agregat = "----";}
             }
           
           }
@@ -398,6 +398,12 @@ function initUIData() {
   var resource = wialon.core.Session.getInstance().getItem(601000284); //601000284   "11_ККЗ"  601000448  "KKZ_Gluhiv"
   drivers= resource.getDrivers();
   trailers = resource.getTrailers();
+  for (const key in trailers) {
+      trailersID[parseInt(trailers[key].c)] = trailers[key].n;
+    }
+  for (const key in drivers) {
+      driversID[parseInt(drivers[key].c)] = drivers[key].n;
+    }
     let gzgroop = resource.getZonesGroups();
     //for (var key in gzgroop) {
     //  if(gzgroop[key].n[0]!='*' && gzgroop[key].n[0]!='#')console.log(gzgroop[key].n)
@@ -1484,7 +1490,7 @@ $("#men8").on("click", function (){
   $('#add').click(Marshrut); // by button
   $("#marshrut").on("click", ".close_btn", delete_track); //click, when need delete current track
   $("#marshrut").on("click", ".run_btn", load_marshrut); //click, when need delete current track
-  $('#eeew').click(function() { UpdateGlobalData(0,zvit2,0);});
+  $('#eeew').click(function() { UpdateGlobalData(0,0);});
   
   $("#marshrut").on("click", ".marr", vibormarshruta);
   $("#zvit").on("click", ".mar_trak", track_marshruta);
@@ -2170,14 +2176,13 @@ function Cikle3(){
        var start=0;
        var cord=0;
        var interval=0;
-    for (let ii = 0; ii<Global_DATA[i].length-1; ii++){
-      if(!Global_DATA[i][ii][3])continue;
-      //if(!Global_DATA[i][ii][0])continue;
+    for (let ii = 1; ii<Global_DATA[i].length-1; ii++){
+ 
       if(!Global_DATA[i][ii][1])continue;
 
 
-          if(start==0 && Global_DATA[i][ii][3][0]==0){start=Global_DATA[i][ii][1], cord=Global_DATA[i][ii][0];}
-          if(start!=0 && Global_DATA[i][ii][3][0]!=0){
+          if(start==0 && Global_DATA[i][ii][3]==0){start=Global_DATA[i][ii][1], cord=Global_DATA[i][ii][0];}
+          if(start!=0 && Global_DATA[i][ii][3]!=0){
           interval = (Date.parse(Global_DATA[i][ii][1])/1000)-(Date.parse(start)/1000);
           if(cord==""){cord=Global_DATA[i][ii][0];}
           data_zup.push([cord,start,Global_DATA[i][ii][1],interval,nametr,id,Global_DATA[i][ii][6]]);
@@ -2188,7 +2193,7 @@ function Cikle3(){
             data_zup.push([cord,start,Global_DATA[i][ii][1],interval,nametr,id,Global_DATA[i][ii][6]]);
           start=0;
           }
-          if(start==0 && Global_DATA[i][ii][3][0]!=0 && (Global_DATA[i][ii+1][4]-Global_DATA[i][ii][4])/1000>500){
+          if(start==0 && Global_DATA[i][ii][3]!=0 && (Global_DATA[i][ii+1][4]-Global_DATA[i][ii][4])/1000>500){
             data_zup.push([Global_DATA[i][ii][0],Global_DATA[i][ii][1],Global_DATA[i][ii][1],500,nametr,id,Global_DATA[i][ii][6]]);
             data_zup.push([Global_DATA[i][ii+1][0],Global_DATA[i][ii+1][1],Global_DATA[i][ii+1][1],500,nametr,id,Global_DATA[i][ii+1][6]]);
           }
@@ -2196,7 +2201,7 @@ function Cikle3(){
     }
   }
 
-
+console.log(data_zup)
   poezdki();
 
 
@@ -2715,7 +2720,7 @@ function track_marshruta(evt){
 
 //=================Data===================================================================================
 Global_DATA=[];
-function UpdateGlobalData(t2=0,idrep=zvit2,i=0){
+function UpdateGlobalData(t2=0,i=0){
     upd=true;
     if(i==0){
      $('#eeew').prop("disabled", true);
@@ -2740,7 +2745,7 @@ function UpdateGlobalData(t2=0,idrep=zvit2,i=0){
         for (let j=0; j<pr; j++){ pr1+="|";}
         for (let j=0; j<100-pr; j++){ pr2+=":";}
         msg("["+pr1+pr2+"] "+ld);
-        CollectGlobalData(t2,idrep,i,unitslist[i]);
+        CollectGlobalData(t2,i,unitslist[i]);
     } else {
       $('button').prop("disabled", false);
       $('#log').empty();
@@ -2751,9 +2756,21 @@ function UpdateGlobalData(t2=0,idrep=zvit2,i=0){
 }
 
 let list_zavatajennya=[];
-function CollectGlobalData(t2,idrep,i,unit){ // execute selected report
-  let id_res=RES_ID, id_unit = unit.getId(), ii=i;
-  if(Global_DATA[ii]==undefined){Global_DATA.push([[id_unit,unit.getName(),Date.parse($('#fromtime1').val())/1000]])}
+function CollectGlobalData(t2,i,unit){ // execute selected report
+  let id_unit = unit.getId(), ii=i;
+  if(Global_DATA[ii]==undefined){
+  let FuelID = -1;
+  let VodiyID = -1;
+  let PrichepID = -1;
+  let sens =  unit.getSensors(); 
+   for (key in sens) {
+          if (sens[key].t=='fuel level') { FuelID=  sens[key].id; }
+           if (sens[key].t=='driver') { VodiyID=  sens[key].id; }
+            if (sens[key].t=='trailer')  { PrichepID=  sens[key].id; }
+        }
+
+    Global_DATA.push([[id_unit,unit.getName(),Date.parse($('#fromtime1').val())/1000,FuelID,VodiyID,PrichepID]])
+  }
   let t1=Global_DATA[ii][0][2];
 
   if(load_list.length!=0){
@@ -2764,46 +2781,56 @@ function CollectGlobalData(t2,idrep,i,unit){ // execute selected report
        break;
       }
    }
-   if(ok==0){ii++; UpdateGlobalData(t2,idrep,ii);return;}
+   if(ok==0){ii++; UpdateGlobalData(t2,ii);return;}
    }
 
   //if($("#gif").is(":checked")) {for (let iii=0; iii<list_zavatajennya.length; iii++){if(list_zavatajennya[iii]==id_unit){break;}if(list_zavatajennya[iii].length-1==iii){ii++; UpdateGlobalData(t2,idrep,ii);return;}}}
-	if(!id_res){ msg("Select resource"); return;} // exit if no resource selected
-	if(!idrep){ msg("Select report template"); return;} // exit if no report template selected
 	if(!id_unit){ msg("Select unit"); return;} // exit if no unit selected
+
+  var to = t2; 
+	var from = t1; 
+
 	var sess = wialon.core.Session.getInstance(); // get instance of current Session
-	var res = sess.getItem(id_res); // get resource by id
-	// specify time interval object
-	var interval = { "from": t1, "to": t2, "flags": wialon.item.MReport.intervalFlag.absolute };
-	var template = res.getReport(idrep); // get report template by id
-  
-	 res.execReport(template, id_unit, 0, interval, // execute selected report
-		function(code, data) { // execReport template
-			if(code){ console.log(wialon.core.Errors.getErrorText(code));ii++; UpdateGlobalData(t2,idrep,ii);return; } // exit if error code
-			if(!data.getTables().length){ii++; UpdateGlobalData(t2,idrep,ii); return; }
-			else{
-        let tables = data.getTables();
-        let headers = tables[0].header;
-        let it=0;
-        let litry=0;
-        let datt=0;
-        for (let j=4; j<headers.length; j++) {if (headers[j].indexOf('Топливо')>=0 || headers[j].indexOf('Паливо')>=0 || headers[j].indexOf('ДУТ ')>=0 || headers[j].indexOf('ДРП ')>=0 ){it=j; break;}}
-        data.getTableRows(0, 0, tables[0].rows,function( code, rows) { 
-          if (code) {console.log(wialon.core.Errors.getErrorText(code)); ii++; UpdateGlobalData(t2,idrep,ii);return;} 
-          for(let j in rows) { 
-            if (typeof rows[j].c == "undefined") continue;
-            //if (j>0 && getTableValue(rows[j].c[0]) == getTableValue(rows[j-1].c[0]) ) continue;
-            litry=0;
-            if (it>0) litry=getTableValue(rows[j].c[it]); 
-            datt= Date.parse(getTableValue(rows[j].c[1]));
-            Global_DATA[ii].push([getTableValue(rows[j].c[0]),getTableValue(rows[j].c[1]),litry,getTableValue(rows[j].c[2]),datt,getTableValue(rows[j].c[4]),getTableValue(rows[j].c[3])]);
-            Global_DATA[ii][0][2]=datt/1000+1;
-          }
-          ii++;
-          UpdateGlobalData(t2,idrep,ii);
-        });
-      }  
-	});       
+
+	var ml = sess.getMessagesLoader(); 
+	ml.loadInterval(id_unit, from, to, 0, 0, 0xffffffff, 
+	    function(code, data){
+		    if(code){ msg(wialon.core.Errors.getErrorText(code));  ii++; UpdateGlobalData(t2,ii);return; } 
+    		else {
+          let messages = data.messages;
+              if(messages.length > 0){
+                 for(var i=0; i<messages.length; i++){ 
+                  if(messages[i].pos){
+                  let xy=messages[i].pos.y+','+messages[i].pos.x;
+                  let date= new Date(messages[i].t*1000- tzoffset).toISOString().slice(0, -5).replace("T", "  ");
+                  let fuel = 0;
+                  let vodiy = 0;
+                  let prichep = 0;
+                   if (Global_DATA[ii][0][3]!=-1) {
+                   fuel = unit.calculateSensorValue(unit.getSensor(Global_DATA[ii][0][3]),messages[i]);
+                   if(fuel == -348201.3876){fuel = "----";} else {fuel = fuel.toFixed();} 
+                   }
+                   if (Global_DATA[ii][0][4]!=-1) {
+                   vodiy = unit.calculateSensorValue(unit.getSensor(Global_DATA[ii][0][4]), messages[i]);
+                   if(vodiy == -348201.3876){vodiy = "----";}else {vodiy = driversID[vodiy];} 
+                   }
+                   if (Global_DATA[ii][0][5]!=-1) {
+                   prichep = unit.calculateSensorValue(unit.getSensor(Global_DATA[ii][0][5]), messages[i]);
+                   if(prichep == -348201.3876){prichep = "----";} else {prichep = trailersID[prichep];} 
+                   }
+          
+              Global_DATA[ii].push([xy,date,fuel,messages[i].pos.s,messages[i].t*1000,prichep,vodiy,messages[i].pos.y,messages[i].pos.x]);
+
+              Global_DATA[ii][0][2]=messages[i].t+1;
+            }           
+            }
+            ii++; UpdateGlobalData(t2,ii);
+              }else{
+                 ii++; UpdateGlobalData(t2,ii);return;
+              }
+        } 
+	    }
+    );       
 }
 
 
@@ -2875,12 +2902,16 @@ function position(t)  {
      }
      for(let i = ind; i<Global_DATA[ii].length; i++){
          if(interval<Global_DATA[ii][i][4]){
-           if(Global_DATA[ii][i][0]=="")continue;
-            y = parseFloat(Global_DATA[ii][i][0].split(',')[0]);
-            x = parseFloat(Global_DATA[ii][i][0].split(',')[1]);
+           if(Global_DATA[ii][i][7]=="")continue;
+            y = Global_DATA[ii][i][7];
+            x = Global_DATA[ii][i][8];
             markerrr.setLatLng([y, x]); 
-            markerrr.bindPopup('<center><font size="1">'+Global_DATA[ii][0][1] +'<br />' +Global_DATA[ii][i][1]+ '<br />' +Global_DATA[ii][i][3]+ '<br />' +Global_DATA[ii][i][2]+'л'+ '<br />' +Global_DATA[ii][i][5]+ '<br />' +Global_DATA[ii][i][6]);
-            if(rux == 1){if (Global_DATA[ii][i][3][0]!='0' ) {markerrr.setOpacity(1);}}
+            let avto = '';
+            let vod = '';
+             if(Global_DATA[ii][i][5]!=0)avto='<br />'+Global_DATA[ii][i][5];
+             if(Global_DATA[ii][i][6]!=0)vod='<br />'+Global_DATA[ii][i][6];
+            markerrr.bindPopup('<center><font size="1">'+Global_DATA[ii][0][1] +'<br />' +Global_DATA[ii][i][1]+ '<br />' +Global_DATA[ii][i][3]+ ' км/год <br />' +Global_DATA[ii][i][2]+'л'+ avto + vod);
+            if(rux == 1){if (Global_DATA[ii][i][3]>0 ) {markerrr.setOpacity(1);}}
             if(agregat == 21){ if (Global_DATA[ii][i][5][0]=='Д' ) {if(rux == 0){markerrr.setOpacity(1);}}else{markerrr.setOpacity(0);}}
             if(agregat == 22){ if (Global_DATA[ii][i][5][0]=='К' ) {if(rux == 0){markerrr.setOpacity(1);}}else{markerrr.setOpacity(0);}}
             if(agregat == 23){ if (Global_DATA[ii][i][5][0]=='Б' ) {if(rux == 0){markerrr.setOpacity(1);}}else{markerrr.setOpacity(0);}}
@@ -2918,7 +2949,7 @@ if(auto_play==true) {
     if(upd==false){
       sec =0;
       upd=true;
-      UpdateGlobalData(0,zvit2,0);
+      UpdateGlobalData(0,0);
     }
      if (sec > 2000)sec =2000;
     }
@@ -3597,6 +3628,109 @@ v1=0;
 
 }
 
+//=================zapros danyx===================================================================================
+function SendDataInCallback(t1=0,t2=0,maska='All',data=[],i=0,calbek){
+  $('button').prop("disabled", true);
+  if (t1==0) t1=Date.parse($('#fromtime1').val())/1000;
+  if (t2==0) t2=Date.parse($('#fromtime2').val())/1000;
+  let str = maska.split(',');
+  let unit= false;
+  if (maska=='All')unit= true;
+    if(i < unitslist.length){
+      str.forEach((element) => {if(unitslist[i].getName().indexOf(element)>=0 && unitslist[i].getName().indexOf('знято')<0){unit = true;}});
+      if(unit){
+        msg(unitslist.length-i);
+        CollectData(t1,t2,maska,data,i,unitslist[i],calbek);
+      }else{
+        i++;
+        SendDataInCallback(t1,t2,maska,data,i,calbek); 
+      }
+    } else {
+      $('button').prop("disabled", false);
+      $('#log').empty();
+      msg('Завантажено');
+      calbek(data);
+    }   
+}
+
+function CollectData(t1,t2,maska,olddata,i,unit,calbek){// execute selected report
+  let id_unit = unit.getId(), ii=i;
+  if (t1==0) t1=Date.parse($('#fromtime1').val())/1000;
+  if (t2==0) t2=Date.parse($('#fromtime2').val())/1000;
+	var sess = wialon.core.Session.getInstance(); // get instance of current Session
+	var ml = sess.getMessagesLoader(); 
+	ml.loadInterval(id_unit, t1, t2, 0, 0, 0xffffffff, 
+	    function(code, data){
+		    if(code){ msg(wialon.core.Errors.getErrorText(code));  ii++; SendDataInCallback(t1,t2,maska,olddata,ii,calbek);return; } 
+    		else {
+          let dataa=[];
+          let FuelID = -1;
+          let VodiyID = -1;
+          let PrichepID = -1;
+          let ImpID = -1;
+          let OBDkmID = -1;   //OBD
+          let OBDrpmID = -1;  //OBD
+          let sens =  unit.getSensors(); 
+          for (key in sens) {
+          if (sens[key].t=='fuel level') { FuelID=  sens[key].id; }
+          if (sens[key].t=='driver') { VodiyID=  sens[key].id; }
+          if (sens[key].t=='trailer')  { PrichepID=  sens[key].id; }
+            if ( sens[key].t=='impulse fuel consumption')  { ImpID=  sens[key].id; }
+              if ( sens[key].p=='io_389')  { OBDkmID=  sens[key].id; }   //OBD
+              if ( sens[key].p=='io_36')  { OBDrpmID=  sens[key].id; }   //OBD
+          }
+           dataa.push([unit.getId(),unit.getName()]);
+          let messages = data.messages;
+              if(messages.length > 0){
+                 for(var i=0; i<messages.length; i++){ 
+                  let xy=null;
+                  let sped=0;
+                  if(messages[i].pos){
+                    xy =messages[i].pos.y+','+messages[i].pos.x;
+                    sped =messages[i].pos.s;
+                  }
+                  let date= new Date(messages[i].t*1000- tzoffset).toISOString().slice(0, -5).replace("T", "  ");
+                  let fuel = null;
+                  let vodiy = null;
+                  let prichep = null;
+                  let imp = null;
+                  let OBDkm = null;   //OBD
+                  let OBDrpm = null;  //OBD
+                   if (FuelID!=-1) {
+                   fuel = unit.calculateSensorValue(unit.getSensor(FuelID),messages[i]);
+                   if(fuel == -348201.3876){fuel = "----";} else {fuel = fuel.toFixed(2);} 
+                   }
+                   if (VodiyID!=-1) {
+                   vodiy = unit.calculateSensorValue(unit.getSensor(VodiyID), messages[i]);
+                   if(vodiy == -348201.3876){vodiy = "----";}else {vodiy = driversID[vodiy];} 
+                   }
+                   if (PrichepID!=-1) {
+                   prichep = unit.calculateSensorValue(unit.getSensor(PrichepID), messages[i]);
+                   if(prichep == -348201.3876){prichep = "----";} else {prichep = trailersID[prichep];} 
+                   }
+                   if (ImpID!=-1) {
+                   imp = unit.getValue(unit.getSensor(ImpID), messages[i]);
+                   if(imp == -348201.3876){imp = "----";} else {imp = imp.toFixed(2);} 
+                   }
+                   if (OBDkmID!=-1) {
+                   OBDkm = unit.calculateSensorValue(unit.getSensor(OBDkmID), messages[i]);
+                   if(OBDkm == -348201.3876){OBDkm = "----";} else {OBDkm = OBDkm.toFixed(1);} 
+                   }
+                   if (OBDrpmID!=-1) {
+                   OBDrpm = unit.calculateSensorValue(unit.getSensor(OBDrpmID), messages[i]);
+                   if(OBDrpm == -348201.3876){OBDrpm = "----";} else {OBDrpm = OBDrpm.toFixed();} 
+                   }
+              dataa.push([xy,date,sped,vodiy,prichep,fuel,imp,OBDkm,OBDrpm]);
+            }
+            olddata.push(dataa);
+            ii++; SendDataInCallback(t1,t2,maska,olddata,ii,calbek);
+              }else{
+                 ii++; SendDataInCallback(t1,t2,maska,olddata,ii,calbek); return;
+              }
+        } 
+	    }
+    );       
+}
 
 
 //=================zapros otchota===================================================================================
@@ -4232,11 +4366,10 @@ $('#robota_polya_BT').click(function (){
       let nnn = '';
       let kol=0;
      for (let ii = 2; ii<Global_DATA[i].length-1; ii+=2){
-      if(!Global_DATA[i][ii][3])continue;
       if(!Global_DATA[i][ii][0])continue;
       if(!Global_DATA[i][ii][4])continue;
       if(!Global_DATA[i][ii+1][4])continue;
-      if(Global_DATA[i][ii][3][0]=='0')continue;
+      if(Global_DATA[i][ii][3]==0)continue;
       let y0 = parseFloat(Global_DATA[i][ii][0].split(',')[0]);
       let x0 = parseFloat(Global_DATA[i][ii][0].split(',')[1]);
 
@@ -4494,7 +4627,7 @@ if(!unitslist[ii].getPosition())continue;
 $('#prAZS').click(function() { 
   let n=unitsgrup.Заправки;
   if(!n)return;
-   SendDataReportInCallback(0,0,n,zvit2,[],0,TestAZS);
+   SendDataInCallback(0,0,n,[],0,TestAZS);
 });
 function TestAZS(data){
   if ($('#unit_info').is(':hidden')) {
@@ -4529,7 +4662,7 @@ function TestAZS(data){
     let namee = data[i][0][1];
     let iddd = data[i][0][0];
     for (let ii = 1; ii < data[i].length; ii++) {
-       if (!data[i][ii-1][5] || data[i][ii-1][5]=='-----')pos++;
+       if (!data[i][ii-1][6] || data[i][ii-1][6]=='-----')pos++;
        if (data[i][ii][0])nav++;
         row++;
       }
@@ -4599,7 +4732,7 @@ let rows = document.querySelectorAll('#monitoring_table tr');
        for (let iii = ii-250; iii<Global_DATA[i].length; iii++){
         if(iii<=0)iii=1;
         if(stoyanka>sttime && iii-ii<100){ stoyanka=-1; points=-1;spd=-1;pereizd=0;robota=0; break; }
-       if(Global_DATA[i][iii][3][0]=='0'){ 
+       if(Global_DATA[i][iii][3]==0){ 
         stoyanka+=(Global_DATA[i][iii][4]-Global_DATA[i][iii-1][4])/1000;
         spd--;
         continue; 
@@ -4667,7 +4800,7 @@ let rows = document.querySelectorAll('#monitoring_table tr');
   let strr="";
  if(rows.length>0){
   for(let v = 0; v<rows.length; v++){
-  if(rows[v].cells[0].textContent==nametr.split(' ')[0]+' '+nametr.split(' ')[1]+''+Global_DATA[i][Global_DATA[i].length-1][5].split(' ')[0]){
+  if(rows[v].cells[0].textContent==nametr.split(' ')[0]+' '+nametr.split(' ')[1]+''+Global_DATA[i][Global_DATA[i].length-1][5]){
    let ind=stroka.length-(rows[v].cells.length-1);
 
    if(ind<=0){
@@ -4706,7 +4839,7 @@ let rows = document.querySelectorAll('#monitoring_table tr');
      if(stroka[v]=="роб <br>невідомо"){coll = "#f8b1c0";}
      strr+= "<td bgcolor = '"+coll+"'>"+stroka[v]+"</td>";
      }
-    $("#monitoring_table").append("<tr id="+id+"><td>"+nametr.split(' ')[0]+' '+nametr.split(' ')[1]+'<br>'+Global_DATA[i][Global_DATA[i].length-1][5].split(' ')[0]+"</td>"+strr+"</tr>");
+    $("#monitoring_table").append("<tr id="+id+"><td>"+nametr.split(' ')[0]+' '+nametr.split(' ')[1]+'<br>'+Global_DATA[i][Global_DATA[i].length-1][5]+"</td>"+strr+"</tr>");
        }
    }
   }
@@ -4718,7 +4851,7 @@ let rows = document.querySelectorAll('#monitoring_table tr');
      if(stroka[v]=="роб <br>невідомо"){coll = "#f8b1c0";}
      strr+= "<td bgcolor = '"+coll+"'>"+stroka[v]+"</td>";
      }
-    $("#monitoring_table").append("<tr id="+id+"><td>"+nametr.split(' ')[0]+' '+nametr.split(' ')[1]+'<br>'+Global_DATA[i][Global_DATA[i].length-1][5].split(' ')[0]+"</td>"+strr+"</tr>");
+    $("#monitoring_table").append("<tr id="+id+"><td>"+nametr.split(' ')[0]+' '+nametr.split(' ')[1]+'<br>'+Global_DATA[i][Global_DATA[i].length-1][5]+"</td>"+strr+"</tr>");
   }
  }
 }});
@@ -4815,7 +4948,7 @@ function RemainsFuel(e){
                 if(idd!=id)continue;
                 for(let iii = 1; iii<Global_DATA[ii].length; iii++){
                    if(time>Global_DATA[ii][iii][4]){
-                    drp =Global_DATA[ii][iii][2].split('.')[0];
+                    drp =Global_DATA[ii][iii][2];
                    }else break;
                 }
               } 
@@ -4858,7 +4991,7 @@ function RemainsFuel(e){
       str.forEach((element) => {if(nametr.indexOf(element)>=0){
        prostoy=0;
        start=0;
-       for (let ii = 0; ii<Global_DATA[i].length-1; ii++){
+       for (let ii = 1; ii<Global_DATA[i].length-1; ii++){
        if(!Global_DATA[i][ii][0])continue;
        if(!Global_DATA[i][ii][4])continue;
        if(!Global_DATA[i][ii+1][4])continue;
@@ -4867,7 +5000,7 @@ function RemainsFuel(e){
        let x = parseFloat(Global_DATA[i][ii][0].split(',')[1]);
         if(wialon.util.Geometry.pointInShape(buferpoly, 0, y, x)){
           if(start==0)start=Global_DATA[i][ii][1];
-          if(Global_DATA[i][ii][3][0]==0){prostoy+=(Global_DATA[i][ii+1][4]-Global_DATA[i][ii][4])/1000;}
+          if(Global_DATA[i][ii][3]==0){prostoy+=(Global_DATA[i][ii+1][4]-Global_DATA[i][ii][4])/1000;}
         }else{ 
           if(start!=0){
             let m = Math.trunc(prostoy / 60) + '';
@@ -4998,15 +5131,13 @@ str.forEach((element) => {if(nametr.indexOf(element)>=0){
  for (let ii = 1; ii<Global_DATA[i].length-7; ii++){
 
 
- if(!Global_DATA[i][ii][3])continue;
- if(!Global_DATA[i][ii+6][3])continue;
+
  if(!Global_DATA[i][ii][4])continue;
  if(!Global_DATA[i][ii+6][4])continue;
- if(!Global_DATA[i][ii][2])continue;
- if(!Global_DATA[i][ii+6][2])continue;
+
  
  
-  if(Global_DATA[i][ii][3][0]==0 && Global_DATA[i][ii+6][3][0]==0){
+  if(Global_DATA[i][ii][3]==0 && Global_DATA[i][ii+6][3]==0){
     zupp0+=(Global_DATA[i][ii+6][4]-Global_DATA[i][ii][4])/1000;
  let ras =(Global_DATA[i][ii][2]-Global_DATA[i][ii+6][2])/((Global_DATA[i][ii+6][4]-Global_DATA[i][ii][4])/3600000);
   if(ras<15 && ras>1){
@@ -5053,7 +5184,7 @@ for (let ii = 2; ii<Global_DATA[i].length-1; ii+=1){
     if(!Global_DATA[i][ii][0])continue;
     if(!Global_DATA[i][ii+1][0])continue;
 
-    if(Global_DATA[i][ii][3][0]=='0'){ 
+    if(Global_DATA[i][ii][3]==0){ 
       stoyanka+=(Global_DATA[i][ii+1][4]-Global_DATA[i][ii][4])/1000;
     let yyy = parseFloat(Global_DATA[i][ii][0].split(',')[0]);
     let xxx = parseFloat(Global_DATA[i][ii][0].split(',')[1]);
@@ -5155,7 +5286,7 @@ for (let ii = 2; ii<Global_DATA[i].length-1; ii+=1){
           let ttt=(Global_DATA[i][j+1][4]-Global_DATA[i][j][4])/1000;
           let km=wialon.util.Geometry.getDistance(jy0,jx0,jy1,jx1);
           let litry=parseFloat(Global_DATA[i][j][2]);
-          if(Global_DATA[i][j][3][0]=='0'){ 
+          if(Global_DATA[i][j][3]==0){ 
             n0++;
             if(t0==0)t0=Global_DATA[i][j][4]/1000;
             if(l1==0)l1=parseFloat(Global_DATA[i][j][2]);
@@ -5185,7 +5316,7 @@ for (let ii = 2; ii<Global_DATA[i].length-1; ii+=1){
           if(per-n>2){
             let lll = parseFloat(Global_DATA[i][per-n][2]);
             let lll0 = parseFloat(Global_DATA[i][per-n-1][2]);
-            if(Global_DATA[i][per-n][3][0]=='0' && Global_DATA[i][per-n-1][3][0]=='0'){
+            if(Global_DATA[i][per-n][3]==0 && Global_DATA[i][per-n-1][3]==0){
               if(lll>lll0){kz+=lll-lll0;}else{
                 if(kz>50)zapr=kz;
                 if(lll>0)pereysd_data0.unshift([lll+zapr,Global_DATA[i][per-n][1]]);
@@ -5197,7 +5328,7 @@ for (let ii = 2; ii<Global_DATA[i].length-1; ii+=1){
           if(i0+n<Global_DATA[i].length-2){
             let lll = parseFloat(Global_DATA[i][i0+n][2]);
             let lll0 = parseFloat(Global_DATA[i][i0+n+1][2]);
-            if(Global_DATA[i][i0+n][3][0]=='0'&& Global_DATA[i][i0+n+1][3][0]=='0'){
+            if(Global_DATA[i][i0+n][3]==0&& Global_DATA[i][i0+n+1][3]==0){
               if(lll<lll0){kz2+=lll0-lll;}else{
                 if(kz2>50)zapr2=kz2;
                 if(lll>0)pereysd_data0.push([lll+zapr2-zapravka,Global_DATA[i][i0+n][1]]);
@@ -5233,7 +5364,7 @@ for (let ii = 2; ii<Global_DATA[i].length-1; ii+=1){
           let ttt=(Global_DATA[i][j+1][4]-Global_DATA[i][j][4])/1000;
           let km=wialon.util.Geometry.getDistance(jy0,jx0,jy1,jx1);
           let litry=parseFloat(Global_DATA[i][j][2]);
-          if(Global_DATA[i][j][3][0]=='0'){ 
+          if(Global_DATA[i][j][3]==0){ 
             n0++;
             if(t0==0)t0=Global_DATA[i][j][4]/1000;
             if(l1==0)l1=parseFloat(Global_DATA[i][j][2]);
@@ -5264,7 +5395,7 @@ for (let ii = 2; ii<Global_DATA[i].length-1; ii+=1){
           if(rob-n>2){
             let lll = parseFloat(Global_DATA[i][rob-n][2]);
             let lll0 = parseFloat(Global_DATA[i][rob-n-1][2]);
-            if(Global_DATA[i][rob-n][3][0]=='0' && Global_DATA[i][rob-n-1][3][0]=='0'){
+            if(Global_DATA[i][rob-n][3]==0 && Global_DATA[i][rob-n-1][3]==0){
               if(lll>lll0){kz+=lll-lll0;}else{
                 if(kz>50)zapr=kz;
                 if(lll>0)pole_data0.unshift([lll+zapr,Global_DATA[i][rob-n][1]]);
@@ -5276,7 +5407,7 @@ for (let ii = 2; ii<Global_DATA[i].length-1; ii+=1){
           if(i0+n<Global_DATA[i].length-2){
             let lll = parseFloat(Global_DATA[i][i0+n][2]);
             let lll0 = parseFloat(Global_DATA[i][i0+n+1][2]);
-            if(Global_DATA[i][i0+n][3][0]=='0'&& Global_DATA[i][i0+n+1][3][0]=='0'){
+            if(Global_DATA[i][i0+n][3]==0&& Global_DATA[i][i0+n+1][3]==0){
               if(lll<lll0){kz2+=lll0-lll;}else{
                 if(kz2>50)zapr2=kz2;
                 if(lll>0)pole_data0.push([lll+zapr2-zapravka,Global_DATA[i][i0+n][1]]);
@@ -5422,7 +5553,7 @@ for(let i = 0; i<geozonesgrup.length; i++){
             mesto=geozonesgrup[i]._tooltip._content;
             $("#unit_table").append("<tr><td  bgcolor='#A9BCF5'><b>"+mesto+"</b></td></tr>");
           }
-          $("#unit_table").append("<tr class='fail_trak' id='"+Global_DATA[ii][0][0]+"," + lat+","+lon+ "'><td align='left'>"+nametr+"</td><td>"+Global_DATA[ii][Global_DATA[ii].length-1][5].split(' ')[0]+"</td><td>"+Global_DATA[ii][Global_DATA[ii].length-1][2]+"</td><td>"+Global_DATA[ii][Global_DATA[ii].length-1][6]+"</td></tr>");
+          $("#unit_table").append("<tr class='fail_trak' id='"+Global_DATA[ii][0][0]+"," + lat+","+lon+ "'><td align='left'>"+nametr+"</td><td>"+Global_DATA[ii][Global_DATA[ii].length-1][5]+"</td><td>"+Global_DATA[ii][Global_DATA[ii].length-1][2]+"</td><td>"+Global_DATA[ii][Global_DATA[ii].length-1][6]+"</td></tr>");
          
         }
       }});
@@ -5459,15 +5590,14 @@ for(let i = 0; i<geozonesgrup.length; i++){
     let p2=0;
  
     
-    for (let ii = 0; ii<Global_DATA[i].length-1; ii++){
-      if(!Global_DATA[i][ii][3])continue;
-      if(!Global_DATA[i][ii+1][3])continue;
+    for (let ii = 1; ii<Global_DATA[i].length-1; ii++){
+
       if(!Global_DATA[i][ii][2])continue;
       if(!Global_DATA[i][ii+1][2])continue;
       if(!Global_DATA[i][ii][4])continue;
       if(!Global_DATA[i][ii+1][4])continue;
-      if(Global_DATA[i][ii][3][0]==0 || Global_DATA[i][ii+1][3][0]==0){
-        if(Global_DATA[i][ii][3][0]!=0)continue;
+      if(Global_DATA[i][ii][3]==0 || Global_DATA[i][ii+1][3]==0){
+        if(Global_DATA[i][ii][3]!=0)continue;
         if(Global_DATA[i][ii][2] !='-----')p1=Global_DATA[i][ii][2];
         if(Global_DATA[i][ii+1][2] !='-----')p2=Global_DATA[i][ii+1][2];
 
@@ -5906,10 +6036,8 @@ async function marshrut_avto(){
       let stop=0;
       let st=0;
       for(let i=2;i<data[0].length;i++){
-        if(!data[0][i-1][2])continue;
-        if(!data[0][i][2])continue;
         if(!data[0][i][0])continue;
-        
+        console.log(parseInt(data[0][i][2]))
         if( parseInt(data[0][i][2])==0){
           let t = Date.parse(data[0][i][1])-Date.parse(data[0][i-1][1]);
           stop+=t;
@@ -5956,7 +6084,7 @@ async function marshrut_avto(){
     $("#magaz").on("click", function (){
       let n=$('#magaz_unit').val();
      if(!n)return;
-      SendDataReportInCallback(0,0,n,zvit2,[],0,magazin);
+      SendDataInCallback(0,0,n,[],0,magazin);
       return;
     });
     function sleep(ms) {return new Promise(resolve => setTimeout(resolve, ms)); }  
@@ -6005,7 +6133,7 @@ async function marshrut_avto(){
               if(!Global_DATA[i][ii][0])continue;
               if(!Global_DATA[i][ii+1][0])continue;
 
-              if(Global_DATA[i][ii][3][0]=='0'){ 
+              if(Global_DATA[i][ii][3]==0){ 
                 stoyanka+=(Global_DATA[i][ii][4]-Global_DATA[i][ii-1][4])/1000;
                 if(stroka.length>0 && stoyanka>sttime){
                   if(stroka[stroka.length-1]!='зуп'){
@@ -6119,7 +6247,7 @@ async function marshrut_avto(){
       let strr="";
      if(rows.length>0){
       for(let v = 0; v<rows.length; v++){
-      if(rows[v].cells[0].textContent==nametr.split(' ')[0]+' '+nametr.split(' ')[1]+''+Global_DATA[i][Global_DATA[i].length-1][5].split(' ')[0]){
+      if(rows[v].cells[0].textContent==nametr.split(' ')[0]+' '+nametr.split(' ')[1]+''+Global_DATA[i][Global_DATA[i].length-1][5]){
        let ind=stroka.length-(rows[v].cells.length-1);
     
        if(ind<=0){
@@ -6158,7 +6286,7 @@ async function marshrut_avto(){
          if(stroka[v]=="роб <br>невідомо"){coll = "#f8b1c0";}
          strr+= "<td bgcolor = '"+coll+"'>"+stroka[v]+"</td>";
          }
-        $("#monitoring_table").append("<tr id="+id+"><td>"+nametr.split(' ')[0]+' '+nametr.split(' ')[1]+'<br>'+Global_DATA[i][Global_DATA[i].length-1][5].split(' ')[0]+"</td>"+strr+"</tr>");
+        $("#monitoring_table").append("<tr id="+id+"><td>"+nametr.split(' ')[0]+' '+nametr.split(' ')[1]+'<br>'+Global_DATA[i][Global_DATA[i].length-1][5]+"</td>"+strr+"</tr>");
            }
        }
       }
@@ -6170,7 +6298,7 @@ async function marshrut_avto(){
          if(stroka[v]=="роб <br>невідомо"){coll = "#f8b1c0";}
          strr+= "<td bgcolor = '"+coll+"'>"+stroka[v]+"</td>";
          }
-        $("#monitoring_table").append("<tr id="+id+"><td>"+nametr.split(' ')[0]+' '+nametr.split(' ')[1]+'<br>'+Global_DATA[i][Global_DATA[i].length-1][5].split(' ')[0]+"</td>"+strr+"</tr>");
+        $("#monitoring_table").append("<tr id="+id+"><td>"+nametr.split(' ')[0]+' '+nametr.split(' ')[1]+'<br>'+Global_DATA[i][Global_DATA[i].length-1][5]+"</td>"+strr+"</tr>");
       }
      }
   }
@@ -6211,7 +6339,7 @@ $('#bbd').click(function() {
   let fr =Date.parse($('#obd_time1').val())/1000;
   let to =Date.parse($('#obd_time2').val())/1000;
   if(!fr){fr=0; to=0;}
-   SendDataReportInCallback(fr,to,n,zvit2,[],0,avto_OBD);
+   SendDataInCallback(fr,to,n,[],0,avto_OBD);
   });
 function avto_OBD(data){
   $("#unit_table").empty();
@@ -6241,43 +6369,43 @@ function avto_OBD(data){
       if(!data[i][ii][0])continue;
       if(!data[i][ii+1][0])continue;
 
-      if(data[i][ii][7]){
-        if(data[i][ii][7]!='-----'){
-          if(dut0==-10)dut0 = parseFloat(data[i][ii][7]);
-          dut1 = parseFloat(data[i][ii][7]);
+      if(data[i][ii][5]){
+        if(data[i][ii][5]!='-----'){
+          if(dut0==-10)dut0 = parseFloat(data[i][ii][5]);
+          dut1 = parseFloat(data[i][ii][5]);
         }
       }
       if(parseInt(data[i][ii][2])>0){
-        if(data[i][ii][7] && data[i][ii][7]!='-----'){
-          zapr1= parseFloat(data[i][ii][7]);
+        if(data[i][ii][5] && data[i][ii][5]!='-----'){
+          zapr1= parseFloat(data[i][ii][5]);
           if( stoy==1  && zapr0>0 &&zapr1-zapr0>5)zapr+=zapr1-zapr0;
-          zapr0=parseFloat(data[i][ii][7]);
+          zapr0=parseFloat(data[i][ii][5]);
           stoy=0;
           }
           
       }else{
-        if(data[i][ii][7] && data[i][ii][7]!='-----'){
-          if(zapr0==-10)zapr0=parseFloat(data[i][ii][7]);
+        if(data[i][ii][5] && data[i][ii][5]!='-----'){
+          if(zapr0==-10)zapr0=parseFloat(data[i][ii][5]);
         }
         stoy=1;
       }
-      if(parseFloat(data[i][ii][7]))zapr00=parseFloat(data[i][ii][7]);
+      if(parseFloat(data[i][ii][5]))zapr00=parseFloat(data[i][ii][5]);
       if(ii==data[i].length-2 && zapr0>=0 && parseInt(data[i][ii][2])==0){
         zapr1= zapr00;
         if(zapr1-zapr0>5)zapr+=zapr1-zapr0;
       }
 
-      if(!data[i][ii][20])continue;
-      if(!data[i][ii+1][20])continue;
-      if(parseInt(data[i][ii][22])){
-        if(km_odo_start==0) km_odo_start = parseInt(data[i][ii][22]);
-        km_odo = parseInt(data[i][ii][22])-km_odo_start;
+      if(!data[i][ii][7])continue;
+      if(!data[i][ii+1][7])continue;
+      if(parseInt(data[i][ii][7])){
+        if(km_odo_start==0) km_odo_start = parseInt(data[i][ii][7]);
+        km_odo = parseInt(data[i][ii][7])-km_odo_start;
       }
       
       let time1 = Date.parse(data[i][ii][1])/1000;
       let time2 = Date.parse(data[i][ii+1][1])/1000;
-      let rpm1 = parseInt(data[i][ii][20]);
-      let rpm2 = parseInt(data[i][ii+1][20]);
+      let rpm1 = parseInt(data[i][ii][8]);
+      let rpm2 = parseInt(data[i][ii+1][8]);
       let y = parseFloat(data[i][ii][0].split(',')[0]);
       let x = parseFloat(data[i][ii][0].split(',')[1]);
       let yy = parseFloat(data[i][ii+1][0].split(',')[0]);
@@ -6426,7 +6554,7 @@ $('#vodiyi_kkz').click(function() {
   if($("#lis0 :selected").html()=='—')return;
   str = $("#lis0 :selected").html();
 }
-    SendDataReportInCallback(fr,to,str,zvit2,[],0,show_all_tracks_data);
+    SendDataInCallback(fr,to,str,[],0,show_all_tracks_data);
     });
 
     function show_all_tracks_data(data){
@@ -6442,7 +6570,6 @@ $('#vodiyi_kkz').click(function() {
         for (let ii = 1; ii<data[i].length-1; ii++){
           if(!data[i][ii][0])continue;
           if(!data[i][ii+1][0])continue;
-          if(!data[i][ii][2])continue;
 
           if(parseInt(data[i][ii][2])==0)continue;
           kk++;
@@ -7560,13 +7687,14 @@ $('#zapr_zvit').click(function() {
     let fr = Date.parse($('#zapr_time1').val())/1000; // get begin time - beginning of day
     if(!fr){fr=0; to=0;}
     let n=unitsgrup.Заправки;
-   SendDataReportInCallback(fr,to,n,7,[],0,zapravki);
+   SendDataInCallback(fr,to,n,[],0,zapravki);
 });
 function zapravki(data) {
+  
   $("#unit_table").empty();
   let tb = [];
  for(let i = 0; i<data.length; i++){
-  if(data[i][0][2][5]=="ДРТ" || data[i][0][2][6]=="ДРТ"){
+  
     let name = data[i][0][1];
     let kk=10.24;
     let a =-555;
@@ -7652,8 +7780,7 @@ function zapravki(data) {
     kk=1023*0.1;
 }
 
-    let drt = 5;
-    if( data[i][0][2][6]=="ДРТ")drt = 6;
+    let drt =6;
     for(let ii = 1; ii<data[i].length; ii++){
       if(data[i][ii][drt]=='-----')continue;
       if(a==-555)a = parseFloat(data[i][ii][drt]);
@@ -7703,7 +7830,7 @@ function zapravki(data) {
     }
    if(sped>0){sped='в русі';}else{sped='стоїть';}
    if(zapr>0.1) tb.push([name,p,start,stop,vodiy,avto,zapr.toFixed(2),sped]);
-  }
+  
  }
    let dut=0;
  if(tb.length>0){
@@ -10136,7 +10263,8 @@ let spisok=''
   }
   if (marshrut_probeg_deny.length==0){
     spisok =spisok.slice(0, -1);
-    SendDataReportInCallback(d1/1000,d0/1000,spisok,zvit4,[],0,km_in_cels);
+    console.log(spisok)
+    SendDataInCallback(d1/1000,d0/1000,spisok,[],0,km_in_cels);
   } else{
     km_in_cels(marshrut_probeg_deny);
   }
@@ -10148,14 +10276,29 @@ let marshrut_probeg_deny=[];
 let control_date0 = 0;
 function km_in_cels(data){ 
   marshrut_probeg_deny=data;
-
   let tb = document.getElementById("log_control_tb");
   for (let i = 1; i<tb.rows.length; i++){
-    for (let j = 0; j<marshrut_probeg_deny.length; j++){
-    if (tb.rows[i].cells[0].innerText.split(' ')[0]==marshrut_probeg_deny[j][0][1].split(' ')[0] && parseInt(marshrut_probeg_deny[j][1][1])>0 && tb.rows[i].cells[1].innerText== "") {
-      tb.rows[i].cells[1].innerHTML="<button style = 'background: rgb(252, 244, 163);width: 100%;' >"+marshrut_probeg_deny[j][1][1]+"</button>";
-      break;
+ if(tb.rows[i].cells[1].innerText!= "")continue;
+ for (let ii = 0; ii<marshrut_probeg_deny.length; ii++){
+   let name = marshrut_probeg_deny[ii][0][1];
+    if (tb.rows[i].cells[0].innerText.split(' ')[0]!=name.split(' ')[0])continue;
+    let probeg = 0;
+    for (let iii = 1; iii<marshrut_probeg_deny[ii].length-2; iii++){
+      if(!data[ii][iii][1])continue;
+      if(!data[ii][iii+1][1])continue;
+      if(!data[ii][iii][0])continue;
+      if(!data[ii][iii+1][0])continue;
+      if(parseInt(data[ii][iii][2])>0 || parseInt(data[ii][iii+1][2])>0){
+             let y = parseFloat(data[ii][iii+1][0].split(',')[0]);
+             let x = parseFloat(data[ii][iii+1][0].split(',')[1]);
+             let yy = parseFloat(data[ii][iii][0].split(',')[0]);
+             let xx = parseFloat(data[ii][iii][0].split(',')[1]);
+             let dis = wialon.util.Geometry.getDistance(y, x, yy, xx);
+              if(dis<100000){probeg+=dis;}
+      }       
     }
+    if(probeg>0)tb.rows[i].cells[1].innerHTML="<button style = 'background: rgb(252, 244, 163);width: 100%;' >"+(probeg/1000).toFixed()+" км</button>";
+    break;
   }
   }
 }  
@@ -10363,7 +10506,7 @@ $("#cont_b3").on("click", function (){
   //$("#lis0").trigger("chosen:updated");
   //layers[0]=0;
   //show_track(t,t2);
-  SendDataReportInCallback(t/1000,t2/1000,n,zvit2,[],0,logistik_zvit);
+  SendDataInCallback(t/1000,t2/1000,n,[],0,logistik_zvit);
   return;
 });
 
@@ -11349,7 +11492,7 @@ $('#marsh_bt3').click(function() {
     
      let data_av = data[ data.length-1];
      $('#marsh_avto').empty();
-     $('#marsh_avto').append("<tr><td></td><td>ЧАС</td><td>ТЗ</td><td>ВОДІЙ</td><td>НАРЯД</td><td></td><td>проб</td><td>ходки</td><td>роб</td><td>час</td></tr>");
+     $('#marsh_avto').append("<tr><td></td><td>ЧАС</td><td>ТЗ</td><td>ВОДІЙ</td><td></td><td>НАРЯД</td><td>проб</td><td>ходки</td><td>роб</td><td>час</td></tr>");
      for(var i=0; i < data_av.length; i++){
 
        let g=data_av[i][0];
@@ -11399,7 +11542,7 @@ marshrut_problem_his.push([e.cells[1].innerText,e.cells[2].innerText,e.cells[3].
   newdiv.innerHTML = '';
 
       
-   SendDataReportInCallback(0,0,"Ваги №3,Ваги №4",7,[],0,vagy_data);
+   SendDataInCallback(0,0,"Ваги №3,Ваги №4",[],0,vagy_data);
    function vagy_data(dt){
     vag_data=[];
     if(dt[0]){
@@ -11520,7 +11663,7 @@ marshrut_problem_his.push([e.cells[1].innerText,e.cells[2].innerText,e.cells[3].
               if(tb_a.rows[i].cells[2].textContent.indexOf(name)>=0){
                  tb_a.rows[i].cells[6].textContent =a;
                  tb_a.rows[i].cells[7].textContent =b;
-                 tb_a.rows[i].cells[8].textContent =c.slice(0,10);
+                 tb_a.rows[i].cells[8].textContent =c.slice(0,5);
                  tb_a.rows[i].cells[9].textContent =d;
                  return;
               }
@@ -11587,7 +11730,6 @@ marshrut_problem_his.push([e.cells[1].innerText,e.cells[2].innerText,e.cells[3].
       for (let iii = 1; iii<Global_DATA[ii].length-1; iii++){
         if(!Global_DATA[ii][iii][0])continue
         if(!Global_DATA[ii][iii+1][0])continue;
-        if(!Global_DATA[ii][iii][3])continue;
 
 
 
@@ -11657,7 +11799,6 @@ function calculate_mn(data,ind){
             if(!Global_DATA[ii][iii][0] && !Global_DATA[ii][iii+1][0])continue
             if(!Global_DATA[ii][iii][4])continue;
             if(!Global_DATA[ii][iii+1][4])continue;
-            if(!Global_DATA[ii][iii][3])continue;
 
             if(Global_DATA[ii][iii][6]!=''){vodiy_tr=Global_DATA[ii][iii][6];}
 
@@ -11904,7 +12045,7 @@ function calculate_mn(data,ind){
   .then(text => {
     let rows = text.split('\r\n');
     $('#marsh_avto').empty();
-    $('#marsh_avto').append("<tr><td></td><td>ЧАС</td><td>ТЗ</td><td>ВОДІЙ</td><td>НАРЯД</td><td></td><td>проб</td><td>ходки</td><td>роб</td><td>час</td></tr>");
+    $('#marsh_avto').append("<tr><td></td><td>ЧАС</td><td>ТЗ</td><td>ВОДІЙ</td><td></td><td>НАРЯД</td><td>проб</td><td>ходки</td><td>роб</td><td>час</td></tr>");
     for(var i=0; i < rows.length-1; i++){
       let td = rows[i].split('\t');
       let g=td[6];
@@ -12080,5 +12221,4 @@ function Rote_gruzoperevozki(p1,p2,color,ind){
           }
         });
 }
-
 
