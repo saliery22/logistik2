@@ -73,15 +73,14 @@ unitslist.forEach(function(unit) {
               fuel = unit.calculateSensorValue(unit.getSensor(sens[key].id), unit.getLastMessage());
               if(fuel == -348201.3876){fuel = "----";} else {fuel = fuel.toFixed();} 
             }
-          
             if (sens[key].t=='driver') {
               vodiy = unit.calculateSensorValue(unit.getSensor(sens[key].id), unit.getLastMessage());
-              if(vodiy == -348201.3876){vodiy = "----";}
+              if(vodiy == -348201.3876){vodiy = "----";}else{vodiy = driversID[vodiy];} 
             }
           
             if (sens[key].t=='trailer') {
               agregat = unit.calculateSensorValue(unit.getSensor(sens[key].id), unit.getLastMessage());
-              if(agregat == -348201.3876){agregat = "----";}
+              if(agregat == -348201.3876){agregat = "----";} else {agregat = trailersID[agregat];} 
             }
           
           }
@@ -150,14 +149,14 @@ function online_ON() {
               if(fuel == -348201.3876){fuel = "----";} else {fuel = fuel.toFixed();} 
             }
           
-            if (sens[key].t=='driver') {
+             if (sens[key].t=='driver') {
               vodiy = unit.calculateSensorValue(unit.getSensor(sens[key].id), unit.getLastMessage());
-              if(vodiy == -348201.3876){vodiy = "----";}
+              if(vodiy == -348201.3876){vodiy = "----";}else{vodiy = driversID[vodiy];} 
             }
           
             if (sens[key].t=='trailer') {
               agregat = unit.calculateSensorValue(unit.getSensor(sens[key].id), unit.getLastMessage());
-              if(agregat == -348201.3876){agregat = "----";}
+              if(agregat == -348201.3876){agregat = "----";} else {agregat = trailersID[agregat];} 
             }
           
           }
