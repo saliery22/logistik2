@@ -64,9 +64,9 @@ unitslist.forEach(function(unit) {
         unitMarker.setOpacity(1);
       var sdsa = unit.getPosition();
      let pop = unitMarker.getPopup();
-       let fuel = '----';
-           let vodiy ='----';
-           let agregat ='----';
+       let fuel = '-----';
+           let vodiy ='-----';
+           let agregat ='-----';
           let sens = unit.getSensors(); // get unit's sensors
           for (key in sens) {
             if (sens[key].t=='fuel level') {
@@ -122,6 +122,11 @@ unitslist.forEach(function(unit) {
 let online_mark = {};
 let event_data = {};
 function online_ON() {
+    for(var i=0; i < allunits.length; i++){
+        let idd =allunits[i].getId();
+        let  mm = markerByUnit[idd];
+             mm.setOpacity(1);
+         }
   online_upd();
   unitslist.forEach(function(unit) {          
     // listen for new messages
@@ -2200,7 +2205,6 @@ function Cikle3(){
     }
   }
 
-console.log(data_zup)
   poezdki();
 
 
@@ -2999,8 +3003,7 @@ if(kn==1){
    
   });
       
-  
-    
+
     
 var icl2 =-1;
 var idun2=0;
@@ -3009,102 +3012,53 @@ let min_zup=60;
 let alone = false;
 
 function Cikle2(){
- icl2+=1;
- if(icl2==0)data_zup=[];
-    let str = maska_zup.split(',');
-    let unit= false;
-    if (maska_zup=='All')unit= true;
-      if(icl2 < unitslist.length){
-        str.forEach((element) => {if(unitslist[icl2].getName().indexOf(element)>=0){unit = true;}});
-        if(unit){
-          msg(unitslist.length-icl2);
-          idun2 = unitslist[icl2];
-          executeReport2(idun2);
-        }else{ Cikle2(); }
-      } else {
-        icl2=-1;
-        $('button').prop("disabled", false);
-        $('#log').empty();
-        msg('Завантажено');
-        zupinki();
-      }   
-}
-function executeReport2(id){ // execute selected report
-    // get data from corresponding fields
-  var id_res=RES_ID, id_templ=zvit3, id_unit=id.getId(), time=$("#interval").val(),idddd=id;
-	if(!id_res){ msg("Select resource"); return;} // exit if no resource selected
-	if(!id_templ){ msg("Select report template"); return;} // exit if no report template selected
-	if(!id_unit){ msg("Select unit"); return;} // exit if no unit selected
-
-	var sess = wialon.core.Session.getInstance(); // get instance of current Session
-	var res = sess.getItem(id_res); // get resource by id
-	var to = Date.parse($('#fromtime2').val())/1000; // get current server time (end time of report time interval)
-  var nam = sess.getItem(id_unit).getName();
-	var from = Date.parse($('#fromtime1').val())/1000; // calculate start time of report
-	// specify time interval object
-	var interval = { "from": from, "to": to, "flags": wialon.item.MReport.intervalFlag.absolute };
-	var template = res.getReport(id_templ); // get report template by id
-	$("#exec_btn").prop("disabled", true); // disable button (to prevent multiclick while execute)
-
-	res.execReport(template, id_unit, 0, interval, // execute selected report
-		function(code, data) { // execReport template
-			$("#exec_btn").prop("disabled", false); // enable button
-			if(code){ msg(wialon.core.Errors.getErrorText(code)); Cikle2();return; } // exit if error code
-			if(!data.getTables().length){ // exit if no tables obtained
-			 Cikle2();return; }
-			else showReportResult2(data,idddd); // show report result
-	});
+  SendDataInCallback(0,0,maska_zup,[],0,Zupinka);
 }
 var data_zup = [];
+function Zupinka(data){ // execute selected report
+  data_zup = [];
+     for (let i = 0; i<data.length; i++){
+    let name = data[i][0][1];
+    let id = data[i][0][0];
+    let kord = 0;
+    let stop = 0;
+    let start = 0;
+    let end = 0;
 
-function showReportResult2(result,name){ // show result after report execute
-	var tables = result.getTables(); // get report tables
-	if (!tables)  {Cikle2(); return;} // exit if no tables
-   
-		var html = [];
-		
-		 //data_unit = [[],[]];
-		
-		if(tables.length>1){
-		result.getTableRows(1, 0, tables[1].rows, // get Table rows
-			qx.lang.Function.bind( function(html, code, rows) { // getTableRows callback
-				if (code) {msg(wialon.core.Errors.getErrorText(code)); return;} // exit if error code
-				for(var j in rows) { // cycle on table rows
-					if (typeof rows[j].c == "undefined") continue; // skip empty rows
-					data_zup.push([getTableValue(rows[j].c[0]),getTableValue(rows[j].c[1]),getTableValue(rows[j].c[2]),getTableValue(rows[j].c[3]),name.getName(),name.getId(),getTableValue(rows[j].c[5]),getTableValue(rows[j].c[6])]);
-        //msg(name.getName());
-       
-				} 	
-        result.getTableRows(0, 0, tables[0].rows, // get Table rows
-			  qx.lang.Function.bind( function(html, code, rows) { // getTableRows callback
-				if (code) {msg(wialon.core.Errors.getErrorText(code));  Cikle2(); return;} // exit if error code
-				for(var j in rows) { // cycle on table rows
-					if (typeof rows[j].c == "undefined") continue; // skip empty rows
-					data_zup.push([getTableValue(rows[j].c[0]),getTableValue(rows[j].c[1]),getTableValue(rows[j].c[2]),getTableValue(rows[j].c[3]),name.getName(),name.getId(),getTableValue(rows[j].c[5]),getTableValue(rows[j].c[6])]);
-        //msg(name.getName());
-         
-				}
-         Cikle2();    				
-			}, this, html)
-		);			
-			}, this, html)
-		);
-} else{
-result.getTableRows(0, 0, tables[0].rows, // get Table rows
-			qx.lang.Function.bind( function(html, code, rows) { // getTableRows callback
-				if (code) {msg(wialon.core.Errors.getErrorText(code));  Cikle2(); return;} // exit if error code
-				for(var j in rows) { // cycle on table rows
-					if (typeof rows[j].c == "undefined") continue; // skip empty rows
-					data_zup.push([getTableValue(rows[j].c[0]),getTableValue(rows[j].c[1]),getTableValue(rows[j].c[2]),getTableValue(rows[j].c[3]),name.getName(),name.getId(),getTableValue(rows[j].c[5]),getTableValue(rows[j].c[6])]);
-        //msg(name.getName());
-         
-				}
-         Cikle2();    				
-			}, this, html)
-		);
+    for (let ii = 1; ii<data[i].length-1; ii++){
+      if(!data[i][ii][1])continue;
+      if(!data[i][ii+1][1])continue;
+      if(!data[i][ii][0])continue;
+      if(!data[i][ii+1][0])continue;
+
+
+      if(parseInt(data[i][ii][2])==0 && parseInt(data[i][ii+1][2])==0){
+       if(kord==0)kord=data[i][ii][0];
+       if(start==0)start=data[i][ii][1];
+       end=data[i][ii][1];
+       let time1 = Date.parse(data[i][ii][1])/1000;
+       let time2 = Date.parse(data[i][ii+1][1])/1000;
+       stop+=time2-time1;
+      }else{
+       if(start!=0){
+        stop=(Date.parse(end)/1000)-(Date.parse(start)/1000)
+        data_zup.push([kord,start,end,sec_to_time(stop),name,id]);
+       }
+        kord = 0;
+        stop = 0;
+        start = 0;
+        end = 0;
+      }
+  }   
+ if(start!=0){
+        stop=(Date.parse(end)/1000)-(Date.parse(start)/1000)
+        data_zup.push([kord,start,end,sec_to_time(stop),name,id]);
+       }
+
+  }
+  zupinki();
 }
 
-}
 
 var zup_mark_data=[];
 var zup_hist=[];
@@ -3142,12 +3096,26 @@ if(data_zup[i][3].split(':').reverse().reduce((acc, n, iy) => acc + n * (60 ** i
                                   iconAnchor: [12, 24] // set icon center
                                   })
                                   }).addTo(map);
-                mark.bindPopup(data_zup[i][4]+'<br />'+data_zup[i][1]+'<br />'+data_zup[i][3]+'<br />'+data_zup[i][6]);
+                mark.bindPopup(data_zup[i][4]+'<br />'+data_zup[i][1]+'<br />'+data_zup[i][3]);
                 zup_mark_data.push(mark);
                  mark.on('click', function(e) {
-                   var cpdataa='';
+                 let pos =  e.target.getLatLng();
+                 if(e.target._popup._content.split('<br />')[3]==undefined){
+            wialon.util.Gis.getLocations([{lat: pos.lat, lon: pos.lng}], function(code, data) {
+        if (code) { msg(wialon.core.Errors.getErrorText(code)); return;} // exit if error code
+        if (data) {
+          let adr =data[0].split(', '); 
+           e.target.setPopupContent(e.target.getPopup().getContent()+'<br />'+adr[0]+"  "+adr[adr.length-1].replace(/[0-9]| km from |\.|\s/g, ''));
+              var cpdataa='';
                  cpdataa += e.target._popup._content.split('<br />')[0] + '\t' +e.target._popup._content.split('<br />')[1] + '\t' +e.target._popup._content.split('<br />')[2] + ' \t' + e.target._popup._content.split('<br />')[3];
-  navigator.clipboard.writeText(cpdataa);  
+           navigator.clipboard.writeText(cpdataa);         
+          }});
+                 }else{
+             var cpdataa='';
+                 cpdataa += e.target._popup._content.split('<br />')[0] + '\t' +e.target._popup._content.split('<br />')[1] + '\t' +e.target._popup._content.split('<br />')[2] + ' \t' + e.target._popup._content.split('<br />')[3];
+           navigator.clipboard.writeText(cpdataa);      
+                 }
+
   treeselect3.value=unitsID[e.target._popup._content.split('<br />')[0]];
   treeselect3.mount();
   layers[0]=0;
@@ -3173,12 +3141,25 @@ if(data_zup[i][3].split(':').reverse().reduce((acc, n, iy) => acc + n * (60 ** i
                                   })
                                   }).addTo(map);
                 if(alone){if(tehnika_poruch(data_zup[i][4],y,x,Date.parse(data_zup[i][1]))){mark.setIcon(L.icon({iconUrl: '333.png',iconSize:[24, 24],iconAnchor: [12, 24]}));}}
-                mark.bindPopup(data_zup[i][4]+'<br />'+data_zup[i][1]+'<br />'+data_zup[i][3]+'<br />'+data_zup[i][6]);
+                mark.bindPopup(data_zup[i][4]+'<br />'+data_zup[i][1]+'<br />'+data_zup[i][3]);
                 zup_mark_data.push(mark);
                  mark.on('click', function(e) {
-                   var cpdataa='';
+                   let pos =  e.target.getLatLng();
+                      if(e.target._popup._content.split('<br />')[3]==undefined){
+            wialon.util.Gis.getLocations([{lat: pos.lat, lon: pos.lng}], function(code, data) {
+        if (code) { msg(wialon.core.Errors.getErrorText(code)); return;} // exit if error code
+        if (data) {
+          let adr =data[0].split(', '); 
+           e.target.setPopupContent(e.target.getPopup().getContent()+'<br />'+adr[0]+"  "+adr[adr.length-1].replace(/[0-9]| km from |\.|\s/g, ''));
+              var cpdataa='';
                  cpdataa += e.target._popup._content.split('<br />')[0] + '\t' +e.target._popup._content.split('<br />')[1] + '\t' +e.target._popup._content.split('<br />')[2] + ' \t' + e.target._popup._content.split('<br />')[3];
-  navigator.clipboard.writeText(cpdataa);  
+           navigator.clipboard.writeText(cpdataa);         
+          }});
+                 }else{
+             var cpdataa='';
+                 cpdataa += e.target._popup._content.split('<br />')[0] + '\t' +e.target._popup._content.split('<br />')[1] + '\t' +e.target._popup._content.split('<br />')[2] + ' \t' + e.target._popup._content.split('<br />')[3];
+           navigator.clipboard.writeText(cpdataa);      
+                 }
   zup_hist.push(e.target._popup._content.split('<br />')[1]+e.target._popup._content.split('<br />')[2]);
   if(zup_hist.length>700){zup_hist.shift();}
   treeselect3.value=unitsID[e.target._popup._content.split('<br />')[0]];
@@ -3195,10 +3176,7 @@ if(data_zup[i][3].split(':').reverse().reduce((acc, n, iy) => acc + n * (60 ** i
    localStorage.setItem('arhivzup', JSON.stringify(zup_hist)); 
                  });
               }
-     
-    
-     
-     
+
     }
    }
  }
@@ -10262,7 +10240,6 @@ let spisok=''
   }
   if (marshrut_probeg_deny.length==0){
     spisok =spisok.slice(0, -1);
-    console.log(spisok)
     SendDataInCallback(d1/1000,d0/1000,spisok,[],0,km_in_cels);
   } else{
     km_in_cels(marshrut_probeg_deny);
@@ -12220,6 +12197,4 @@ function Rote_gruzoperevozki(p1,p2,color,ind){
           }
         });
 }
-
-
 
