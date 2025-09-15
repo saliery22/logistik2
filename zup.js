@@ -71,16 +71,16 @@ unitslist.forEach(function(unit) {
           for (key in sens) {
             if (sens[key].t=='fuel level') {
               fuel = unit.calculateSensorValue(unit.getSensor(sens[key].id), unit.getLastMessage());
-              if(fuel == -348201.3876){fuel = "----";} else {fuel = fuel.toFixed();} 
+              if(fuel == -348201.3876){fuel = "-----";} else {fuel = fuel.toFixed();} 
             }
             if (sens[key].t=='driver') {
               vodiy = unit.calculateSensorValue(unit.getSensor(sens[key].id), unit.getLastMessage());
-              if(vodiy == -348201.3876){vodiy = "----";}else{vodiy = driversID[vodiy];} 
+              if(vodiy == -348201.3876){vodiy = "-----";}else{vodiy = driversID[vodiy];} 
             }
           
             if (sens[key].t=='trailer') {
               agregat = unit.calculateSensorValue(unit.getSensor(sens[key].id), unit.getLastMessage());
-              if(agregat == -348201.3876){agregat = "----";} else {agregat = trailersID[agregat];} 
+              if(agregat == -348201.3876){agregat = "-----";} else {agregat = trailersID[agregat];} 
             }
           
           }
@@ -139,24 +139,24 @@ function online_ON() {
          let pop = unitMarker.getPopup();
         
         
-           let fuel = '----';
-           let vodiy ='----';
-           let agregat ='----';
+           let fuel = '-----';
+           let vodiy ='-----';
+           let agregat ='-----';
           let sens = unit.getSensors(); // get unit's sensors
                  for (key in sens) {
             if (sens[key].t=='fuel level') {
               fuel = unit.calculateSensorValue(unit.getSensor(sens[key].id), unit.getLastMessage());
-              if(fuel == -348201.3876){fuel = "----";} else {fuel = fuel.toFixed();} 
+              if(fuel == -348201.3876){fuel = "-----";} else {fuel = fuel.toFixed();} 
             }
           
              if (sens[key].t=='driver') {
               vodiy = unit.calculateSensorValue(unit.getSensor(sens[key].id), unit.getLastMessage());
-              if(vodiy == -348201.3876){vodiy = "----";}else{vodiy = driversID[vodiy];} 
+              if(vodiy == -348201.3876){vodiy = "-----";}else{vodiy = driversID[vodiy];} 
             }
           
             if (sens[key].t=='trailer') {
               agregat = unit.calculateSensorValue(unit.getSensor(sens[key].id), unit.getLastMessage());
-              if(agregat == -348201.3876){agregat = "----";} else {agregat = trailersID[agregat];} 
+              if(agregat == -348201.3876){agregat = "-----";} else {agregat = trailersID[agregat];} 
             }
           
           }
@@ -2807,15 +2807,15 @@ function CollectGlobalData(t2,i,unit){ // execute selected report
                   let prichep = 0;
                    if (Global_DATA[ii][0][3]!=-1) {
                    fuel = unit.calculateSensorValue(unit.getSensor(Global_DATA[ii][0][3]),messages[i]);
-                   if(fuel == -348201.3876){fuel = "----";} else {fuel = fuel.toFixed();} 
+                   if(fuel == -348201.3876){fuel = "-----";} else {fuel = fuel.toFixed();} 
                    }
                    if (Global_DATA[ii][0][4]!=-1) {
                    vodiy = unit.calculateSensorValue(unit.getSensor(Global_DATA[ii][0][4]), messages[i]);
-                   if(vodiy == -348201.3876){vodiy = "----";}else {vodiy = driversID[vodiy];} 
+                   if(vodiy == -348201.3876){vodiy = "-----";}else {vodiy = driversID[vodiy];} 
                    }
                    if (Global_DATA[ii][0][5]!=-1) {
                    prichep = unit.calculateSensorValue(unit.getSensor(Global_DATA[ii][0][5]), messages[i]);
-                   if(prichep == -348201.3876){prichep = "----";} else {prichep = trailersID[prichep];} 
+                   if(prichep == -348201.3876){prichep = "-----";} else {prichep = trailersID[prichep];} 
                    }
           
               Global_DATA[ii].push([xy,date,fuel,messages[i].pos.s,messages[i].t*1000,prichep,vodiy,messages[i].pos.y,messages[i].pos.x]);
@@ -3697,27 +3697,27 @@ function CollectData(t1,t2,maska,olddata,i,unit,calbek){// execute selected repo
                   let OBDrpm = null;  //OBD
                    if (FuelID!=-1) {
                    fuel = unit.calculateSensorValue(unit.getSensor(FuelID),messages[i]);
-                   if(fuel == -348201.3876){fuel = "----";} else {fuel = fuel.toFixed(2);} 
+                   if(fuel == -348201.3876){fuel = "-----";} else {fuel = fuel.toFixed(2);} 
                    }
                    if (VodiyID!=-1) {
                    vodiy = unit.calculateSensorValue(unit.getSensor(VodiyID), messages[i]);
-                   if(vodiy == -348201.3876){vodiy = "----";}else {vodiy = driversID[vodiy];} 
+                   if(vodiy == -348201.3876){vodiy = "-----";}else {vodiy = driversID[vodiy];} 
                    }
                    if (PrichepID!=-1) {
                    prichep = unit.calculateSensorValue(unit.getSensor(PrichepID), messages[i]);
-                   if(prichep == -348201.3876){prichep = "----";} else {prichep = trailersID[prichep];} 
+                   if(prichep == -348201.3876){prichep = "-----";} else {prichep = trailersID[prichep];} 
                    }
                    if (ImpID!=-1) {
                    imp = unit.getValue(unit.getSensor(ImpID), messages[i]);
-                   if(imp == -348201.3876){imp = "----";} else {imp = imp.toFixed(2);} 
+                   if(imp == -348201.3876){imp = "-----";} else {imp = imp.toFixed(2);} 
                    }
                    if (OBDkmID!=-1) {
                    OBDkm = unit.calculateSensorValue(unit.getSensor(OBDkmID), messages[i]);
-                   if(OBDkm == -348201.3876){OBDkm = "----";} else {OBDkm = OBDkm.toFixed(1);} 
+                   if(OBDkm == -348201.3876){OBDkm = "-----";} else {OBDkm = OBDkm.toFixed(1);} 
                    }
                    if (OBDrpmID!=-1) {
                    OBDrpm = unit.calculateSensorValue(unit.getSensor(OBDrpmID), messages[i]);
-                   if(OBDrpm == -348201.3876){OBDrpm = "----";} else {OBDrpm = OBDrpm.toFixed();} 
+                   if(OBDrpm == -348201.3876){OBDrpm = "-----";} else {OBDrpm = OBDrpm.toFixed();} 
                    }
               dataa.push([xy,date,sped,vodiy,prichep,fuel,imp,OBDkm,OBDrpm]);
             }
@@ -12220,5 +12220,6 @@ function Rote_gruzoperevozki(p1,p2,color,ind){
           }
         });
 }
+
 
 
