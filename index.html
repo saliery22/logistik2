@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8" />
+    <title>SKLAD</title>
+    <script type="text/javascript" src="//code.jquery.com/jquery-latest.min.js"></script>
+    <script type="text/javascript" src="//hst-api.wialon.com/wsdk/script/wialon.js"></script>
+
+    
+  </head>
+    <style>
+       #data { overflow-y: auto; overflow-x: auto;border-top: 2px solid #949393;padding-top: 10px;margin-top: 10px;}
+       table { border: 1px solid #000000;  border-collapse: collapse;}
+       td,th { border: 1px solid #000000; padding: 5px; }
+    </style>
+  <body>
+    <audio id=audio src="scannerbeep.mp3" ></audio> 
+
+      <div  id="menu">
+<button id='m1'>Реєстр</button> 
+<button id='m2'>Залишки</button> 
+<button id='m3'>Операції</button> 
+<button id='m4'>видаткова наклада</button> 
+<button id='m5'>прибуткова наклада</button> 
+      </div>
+      <div id="data">
+      <table id="table"class='table'></table>
+      </div>
+      
+   
+  
+  
+ 
+    <script src="sklad.js"></script>
+    
+
+  </body>
+
+</html>
