@@ -25,7 +25,7 @@ update_jurnal(ftp_id,'Options.txt',function (size) {
      for (i = 1; i < data.length; i++){
       let m = data[i].split('|');
       let d =new Date(parseInt(m[0])).toLocaleString("uk-UA", {year:'numeric',month:'numeric',day:'numeric',hour:'numeric', minute: 'numeric', second: 'numeric'});
-    $("#table").append("<tr><td>"+i+"</td><td>"+d+"</td><td>"+m[1]+"</td><td><button>надходження</button>&nbsp;&nbsp;&nbsp;<button>видаток</button>&nbsp;&nbsp;&nbsp;<button>видалити</button></td></tr>");
+    $("#table").append("<tr><td>"+i+"</td><td>"+d+"</td><td>"+m[1]+"</td><td><button>до надходження</button>&nbsp;&nbsp;&nbsp;<button>видаток</button>&nbsp;&nbsp;&nbsp;<button>видалити</button></td></tr>");
      }
     });
     option=size;
@@ -39,11 +39,11 @@ update_jurnal(ftp_id,'Options.txt',function (size) {
 function write_jurnal(id,file_name,content,calbek){
   let remotee= wialon.core.Remote.getInstance(); 
   remotee.remoteCall('file/write',{'itemId':id,'storageType':1,'path':'//sklad/'+file_name,"content":content,"writeType":1,'contentType':0},function (error) {
-    if (error) {msg(wialon.core.Errors.getErrorText(error));
+    if (error) {
+    alert(wialon.core.Errors.getErrorText(error));
     return;
     }else{
     audio.play();
-    alert(wialon.core.Errors.getErrorText(error));
     calbek();
     return;
    }
