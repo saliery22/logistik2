@@ -101,9 +101,7 @@ for (let i = 0; i < table.rows.length; i++) {
     let row = table.rows[i];
     for (let j = 0; j < row.cells.length; j++) {
         let cell = row.cells[j];
-         if(j>0 && j<3){
-          temp+="|"+cell.textContent;
-         }
+
          if(j==1)temp+="|"+Date.parse(cell.textContent);
          if(j==2)temp+="|"+cell.textContent;
     }
