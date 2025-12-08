@@ -104,6 +104,8 @@ for (let i = 0; i < table.rows.length; i++) {
          if(j>0 && j<3){
           temp+="|"+cell.textContent;
          }
+         if(j==1)temp+="|"+Date.parse(cell.textContent);
+         if(j==2)temp+="|"+cell.textContent;
     }
      if(temp!="|"){ 
      data+=temp;
