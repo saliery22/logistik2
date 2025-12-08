@@ -25,7 +25,7 @@ update_jurnal(ftp_id,'Options.txt',function (size) {
      for (i = 1; i < data.length; i++){
       let m = data[i].split('|');
       let d =new Date(parseInt(m[0])).toLocaleString("uk-UA", {year:'numeric',month:'numeric',day:'numeric',hour:'numeric', minute: 'numeric', second: 'numeric'});
-    $("#table").append("<tr><td>"+i+"</td><td>"+d+"</td><td>"+m[1]+"</td><td><button>до надходження</button>&nbsp;&nbsp;&nbsp;<button>видаток</button>&nbsp;&nbsp;&nbsp;<button>видалити</button></td></tr>");
+    $("#table").append("<tr><td>"+i+"</td><td>"+d+"</td><td>"+m[1]+"</td><td><button>до надходження</button>&nbsp;&nbsp;&nbsp;<button>видаток</button>&nbsp;&nbsp;&nbsp;<button class='actionBtn'>видалити</button></td></tr>");
      }
     });
     option=size;
@@ -87,4 +87,38 @@ function update_jurnal(id,file_name,calbek){
      return;
     } 
 });
+}
+
+$("#table").on("click", ".actionBtn", deletes); 
+
+function deletes(evt){
+let row = evt.target.parentNode.parentNode;
+$(row).remove();
+let data = "\n";
+let table = document.getElementById('table');
+for (let i = 0; i < table.rows.length; i++) {
+     let temp ="|";
+    let row = table.rows[i];
+    for (let j = 0; j < row.cells.length; j++) {
+        let cell = row.cells[j];
+         if(j>0 && j<3){
+          temp+="|"+cell.textContent;
+         }
+    }
+     if(temp!="|"){ 
+     data+=temp;
+    } 
+}
+
+rewrite_jurnal(ftp_id,'Options.txt',data,function () { 
+$('#table').empty();
+    load_jurnal(ftp_id,'Options.txt',function (data) { 
+     for (i = 1; i < data.length; i++){
+      let m = data[i].split('|');
+      let d =new Date(parseInt(m[0])).toLocaleString("uk-UA", {year:'numeric',month:'numeric',day:'numeric',hour:'numeric', minute: 'numeric', second: 'numeric'});
+    $("#table").append("<tr><td>"+i+"</td><td>"+d+"</td><td>"+m[1]+"</td><td><button>до надходження</button>&nbsp;&nbsp;&nbsp;<button>видаток</button>&nbsp;&nbsp;&nbsp;<button class='actionBtn'>видалити</button></td></tr>");
+     }
+    });
+});
+
 }
