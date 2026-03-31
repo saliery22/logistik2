@@ -1,6 +1,6 @@
 
 
-let TOKEN = '4d2e59443e9e64c89c5725f14c042fbdCA9CB0960781B27C57D1CB36A91BDACF276928E6';
+let TOKEN = '4d2e59443e9e64c89c5725f14c042fbd3D91C94CFE94B0EDAD6EAEC75C6C8F4A428020D3';
 let data=[];
 let ftp_id = 601000441; 
 
@@ -25,7 +25,7 @@ update_jurnal(ftp_id,'Options.txt',function (size) {
      for (i = 1; i < data.length; i++){
       let m = data[i].split('|');
       let d =new Date(parseInt(m[0])).toLocaleString("uk-UA", {year:'numeric',month:'numeric',day:'numeric',hour:'numeric', minute: 'numeric', second: 'numeric'});
-    $("#table").append("<tr><td>"+i+"</td><td>"+d+"</td><td>"+m[1]+"</td><td><button>до надходження</button>&nbsp;&nbsp;&nbsp;<button>видаток</button>&nbsp;&nbsp;&nbsp;<button class='actionBtn'>видалити</button></td></tr>");
+    $("#table").append("<tr><td>"+i+"</td><td>"+d+"</td><td>"+m[1]+"</td><td>"+m[2]+"</td>td><button>до надходження</button>&nbsp;&nbsp;&nbsp;<button>видаток</button>&nbsp;&nbsp;&nbsp;<button class='actionBtn'>видалити</button></td></tr>");
      }
     });
     option=size;
@@ -104,6 +104,7 @@ for (let i = 0; i < table.rows.length; i++) {
 
          if(j==1)temp+="|"+Date.parse(cell.textContent);
          if(j==2)temp+="|"+cell.textContent;
+         if(j==3)temp+="|"+cell.textContent;
     }
      if(temp!="|"){ 
      data+=temp;
@@ -116,11 +117,9 @@ $('#table').empty();
      for (i = 1; i < data.length; i++){
       let m = data[i].split('|');
       let d =new Date(parseInt(m[0])).toLocaleString("uk-UA", {year:'numeric',month:'numeric',day:'numeric',hour:'numeric', minute: 'numeric', second: 'numeric'});
-    $("#table").append("<tr><td>"+i+"</td><td>"+d+"</td><td>"+m[1]+"</td><td><button>до надходження</button>&nbsp;&nbsp;&nbsp;<button>видаток</button>&nbsp;&nbsp;&nbsp;<button class='actionBtn'>видалити</button></td></tr>");
+    $("#table").append("<tr><td>"+i+"</td><td>"+d+"</td><td>"+m[1]+"</td><td>"+m[2]+"</td><td><button>до надходження</button>&nbsp;&nbsp;&nbsp;<button>видаток</button>&nbsp;&nbsp;&nbsp;<button class='actionBtn'>видалити</button></td></tr>");
      }
     });
 });
 
 }
-
-
