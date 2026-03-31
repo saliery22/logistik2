@@ -25,7 +25,7 @@ update_jurnal(ftp_id,'Options.txt',function (size) {
      for (i = 1; i < data.length; i++){
       let m = data[i].split('|');
       let d =new Date(parseInt(m[0])).toLocaleString("uk-UA", {year:'numeric',month:'numeric',day:'numeric',hour:'numeric', minute: 'numeric', second: 'numeric'});
-    $("#table").append("<tr><td>"+i+"</td><td>"+d+"</td><td>"+m[1]+"</td><td>"+m[2]+"</td>td><button>до надходження</button>&nbsp;&nbsp;&nbsp;<button>видаток</button>&nbsp;&nbsp;&nbsp;<button class='actionBtn'>видалити</button></td></tr>");
+    $("#table").append("<tr><td>"+i+"</td><td>"+d+"</td><td>"+m[1]+"</td><td>"+m[2]+"</td><td><button>до надходження</button>&nbsp;&nbsp;&nbsp;<button>видаток</button>&nbsp;&nbsp;&nbsp;<button class='actionBtn'>видалити</button></td></tr>");
      }
     });
     option=size;
